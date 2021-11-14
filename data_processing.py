@@ -1,6 +1,5 @@
 import csv
 from datetime import datetime
-from pandas.tseries.holiday import USFederalHolidayCalendar
 from itertools import islice
 import holidays
 
