@@ -2,6 +2,7 @@ import csv
 from datetime import datetime
 from pandas.tseries.holiday import USFederalHolidayCalendar
 from itertools import islice
+import holidays
 
 
 def read_csv(old_file_name, new_file_name):
@@ -34,8 +35,7 @@ def read_csv(old_file_name, new_file_name):
                 new_row.append(date_time_obj.weekday() + 1)
                 new_row.append(date_time_obj.hour + 1)
 
-                calendar = USFederalHolidayCalendar().holidays(start='2013-09-01', end='2014-08-13').to_pydatetime()
-                if date_time_obj in calendar:
+                if date_time_obj in holidays.NLD():
                     new_row.append(1)  # True
                 else:
                     new_row.append(0)  # False
