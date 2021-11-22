@@ -64,6 +64,6 @@ def read_csv(old_file_name, new_file_name):
 
 
 if __name__ == '__main__':
-    old_file = "./datas/newprofiles.csv"
+    old_file = "./datas/new_profiles.csv"
     new_file = "./datas/new_profiles_processed.csv"
     read_csv(old_file, new_file)
