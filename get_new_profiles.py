@@ -2,6 +2,7 @@ import pandas as pd
 import csv
 import os
 
+
 def get_future_price(energy_DF, current_day, current_hour):
     try:
         row = current_day * 24 + current_hour
@@ -19,14 +20,18 @@ def get_timestamp(energy_DF, current_day, current_hour):
         return None
     return timestamp
 
+
 def for_each_home(current_folder, price_energy_name, old_profiles_file, new_profiles_name):
     for element in os.listdir(current_folder):
         if os.path.isdir(os.path.join(current_folder, element)):
-            for_each_home(os.path.join(current_folder, element), energy_price_file, old_profiles_name, new_profiles_name)
+            for_each_home(os.path.join(current_folder, element), energy_price_file, old_profiles_name,
+                          new_profiles_name)
         elif os.path.isfile(os.path.join(current_folder, element)) and element == old_profiles_name:
-            read_old_build_new(energy_price_file, os.path.join(current_folder, element), os.path.join(current_folder, new_profiles_name))
+            read_old_build_new(energy_price_file, os.path.join(current_folder, element),
+                               os.path.join(current_folder, new_profiles_name))
             update_new(os.path.join(current_folder, new_profiles_name))
     return
+
 
 def read_old_build_new(energy_price_file, old_profiles_file, new_profiles_file):
     print(old_profiles_file)
