@@ -21,14 +21,14 @@ def get_timestamp(energy_DF, current_day, current_hour):
     return timestamp
 
 
-def for_each_home(current_folder, price_energy_name, old_profiles_file, new_profiles_name):
+def for_each_home(current_folder, energy_price_file, old_profiles_name, new_profiles_name):
     for element in os.listdir(current_folder):
         if os.path.isdir(os.path.join(current_folder, element)):
-            for_each_home(os.path.join(current_folder, element), energy_price_file, old_profiles_name,
-                          new_profiles_name)
+            for_each_home(os.path.join(current_folder, element),
+                          energy_price_file, old_profiles_name, new_profiles_name)
         elif os.path.isfile(os.path.join(current_folder, element)) and element == old_profiles_name:
-            read_old_build_new(energy_price_file, os.path.join(current_folder, element),
-                               os.path.join(current_folder, new_profiles_name))
+            read_old_build_new(energy_price_file, os.path.join(
+                current_folder, element), os.path.join(current_folder, new_profiles_name))
             update_new(os.path.join(current_folder, new_profiles_name))
     return
 
@@ -52,8 +52,10 @@ def read_old_build_new(energy_price_file, old_profiles_file, new_profiles_file):
         last_input_state_of_charge = -1
         while True:
             timestamp = get_timestamp(energy_DF, current_day, current_hour)
-            future_price = get_future_price(energy_DF, current_day, current_hour)
-            if timestamp == None or future_price == None: break
+            future_price = get_future_price(
+                energy_DF, current_day, current_hour)
+            if timestamp == None or future_price == None:
+                break
             consumption_kwh = 0.0
             PV_kwh = 0.0
             state = 0
@@ -84,7 +86,8 @@ def read_old_build_new(energy_price_file, old_profiles_file, new_profiles_file):
                 if last_input_state_of_charge != -1:
                     input_state_of_charge = -2
             try:
-                last_input_state_of_charge = profile_DF.at[row + 11, "phev_initial_state_of_charge_kwh"]
+                last_input_state_of_charge = profile_DF.at[row +
+                                                           11, "phev_initial_state_of_charge_kwh"]
             except KeyError:
                 break
             row += 12
@@ -140,4 +143,5 @@ if __name__ == "__main__":
     old_profiles_name = "profiles.csv"
     new_profiles_name = "new_profiles.csv"
     folder = "./datas/muratori_5"
-    for_each_home(folder, energy_price_file, old_profiles_name, new_profiles_name)
+    for_each_home(folder, energy_price_file,
+                  old_profiles_name, new_profiles_name)
