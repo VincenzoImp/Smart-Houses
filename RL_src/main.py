@@ -1,5 +1,4 @@
 from home import *
-from libraries import *
 
 
 def main(path_dir_home):

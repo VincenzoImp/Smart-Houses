@@ -1,16 +1,16 @@
-from NSL import *
-from SL import *
-from Naif_Battery import *
-from DP_Battery import *
 from CL import *
-from libraries import *
+from DP_Battery import *
+from NSL import *
+from Naif_Battery import *
+from SL import *
+
 
 class Home(object):
-    def __init__(self, path_dir_home, p = 0.8, teta = 0.1, gamma = 0.95, epsilon = 0.2, loops = 1000, one_memory = False):
-        self.p = p                      #(1-p) é la prioritá di ottimizzare i consumi, e p é la prioritá di ottimizzare i disservizi #[0.3, 0.5, 0.8]
-        self.teta = teta                #θ ∈ [0,1] è un tasso di apprendimento che rappresenta in che misura il nuovo prevale sui vecchi valori Q
-        self.gamma = gamma              #γ ∈ [0,1] è un fattore di attualizzazione che indica l'importanza relativa dei premi futuri rispetto a quelli attuali
-        self.epsilon = epsilon          #epsilon é la probabilitá di scegliere un azione random. (1-epsilon) é la probabilitá di scegliere l'azione migliore
+    def __init__(self, path_dir_home, p=0.8, teta=0.1, gamma=0.95, epsilon=0.2, loops=1000, one_memory=False):
+        self.p = p  # (1-p) é la prioritá di ottimizzare i consumi, e p é la prioritá di ottimizzare i disservizi #[0.3, 0.5, 0.8]
+        self.teta = teta  # θ ∈ [0,1] è un tasso di apprendimento che rappresenta in che misura il nuovo prevale sui vecchi valori Q
+        self.gamma = gamma  # γ ∈ [0,1] è un fattore di attualizzazione che indica l'importanza relativa dei premi futuri rispetto a quelli attuali
+        self.epsilon = epsilon  # epsilon é la probabilitá di scegliere un azione random. (1-epsilon) é la probabilitá di scegliere l'azione migliore
         self.directory = os.path.join(path_dir_home, datetime.datetime.now().strftime("%Y-%m-%d-%H_%M_%S"))
         self.timestamp = ""
         self.current_day = 0
@@ -22,7 +22,7 @@ class Home(object):
         self.path_dir_home = path_dir_home
         self.device_list = set()
         return
-    
+
     def insert_devices(self):
         insert_NSL(self)
         insert_NSL_Battery(self)
@@ -46,7 +46,7 @@ class Home(object):
             try:
                 timestamp = house_profile_DF.at[self.count_row, "timestamp"]
                 for i in range(24):
-                    self.array_price[i] = house_profile_DF.at[self.count_row+i, "energy_market_price"]
+                    self.array_price[i] = house_profile_DF.at[self.count_row + i, "energy_market_price"]
             except:
                 break
             thread_list = []
@@ -59,7 +59,7 @@ class Home(object):
                 e, u = thread.join()
                 E += e
                 U += u
-            time = datetime.datetime.now()-time
+            time = datetime.datetime.now() - time
             with open(filename_main, "a") as file_object:
                 csv.writer(file_object).writerow([timestamp, E, U, time])
             current_hour += 1
@@ -69,13 +69,22 @@ class Home(object):
             self.count_row += 1
         file_name = os.path.join(self.directory, "info.txt")
         with open(file_name, "w") as file_object:
-            file_object.write("p: {} (p ∈ [0,1] é la prioritá di ottimizzare i disservizi. (1-p) é la prioritá di ottimizzare i consumi. Nell'articolo é [0.8, 0.5, 0.3])\n".format(self.p))
-            file_object.write("teta: {} (θ ∈ [0,1] è un tasso di apprendimento che rappresenta in che misura il nuovo prevale sui vecchi valori Q. Nell'articolo é 0.1)\n".format(self.teta))
-            file_object.write("gamma: {} (γ ∈ [0,1] è un fattore di attualizzazione che indica l'importanza relativa dei premi futuri rispetto a quelli attuali. Nell'articolo é 0.95)\n".format(self.gamma))
-            file_object.write("epsilon: {} (epsilon é la probabilitá di scegliere un azione random. (1-epsilon) é la probabilitá di scegliere l'azione migliore)\n".format(self.epsilon))
+            file_object.write(
+                "p: {} (p ∈ [0,1] é la prioritá di ottimizzare i disservizi. (1-p) é la prioritá di ottimizzare i consumi. Nell'articolo é [0.8, 0.5, 0.3])\n".format(
+                    self.p))
+            file_object.write(
+                "teta: {} (θ ∈ [0,1] è un tasso di apprendimento che rappresenta in che misura il nuovo prevale sui vecchi valori Q. Nell'articolo é 0.1)\n".format(
+                    self.teta))
+            file_object.write(
+                "gamma: {} (γ ∈ [0,1] è un fattore di attualizzazione che indica l'importanza relativa dei premi futuri rispetto a quelli attuali. Nell'articolo é 0.95)\n".format(
+                    self.gamma))
+            file_object.write(
+                "epsilon: {} (epsilon é la probabilitá di scegliere un azione random. (1-epsilon) é la probabilitá di scegliere l'azione migliore)\n".format(
+                    self.epsilon))
             file_object.write("one_memory: {}\n".format(self.one_memory))
             file_object.write("loops: {}\n".format(self.loops))
         return
+
 
 class Device_thread(threading.Thread):
 
@@ -95,5 +104,3 @@ class Device_thread(threading.Thread):
     def join(self):
         threading.Thread.join(self)
         return self.E, self.U
-
-
