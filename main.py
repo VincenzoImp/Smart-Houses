@@ -28,4 +28,4 @@ if __name__ == '__main__':
     prepare_NN_data(energy_price_file, NN_datas_file)
 
     print('NNmodel')
-    NN_model(NN_datas_file, NN_result_file)
+    NN_model(NN_datas_file, NN_result_file, True)

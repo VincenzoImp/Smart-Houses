@@ -6,14 +6,19 @@ import numpy as np
 import pandas as pd
 from keras.layers import Dense, LSTM
 from keras.models import Sequential
+from sklearn.metrics import max_error, mean_squared_error
+from sklearn.metrics import mean_absolute_error
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
 
-def NN_model(input_csv, output_csv):
+def NN_model(input_csv, output_csv, is_test=False):
     features = ['energy_price_ahead_' + str(n) for n in range(50, -1, -1)]
     class_labels = ['energy_price_forward_' + str(n) for n in range(1, 13)]
 
     df = pd.read_csv(input_csv)
+    if is_test:
+        df = df.sample(frac=0.30)
 
     x = df[features]
     y = df[class_labels]
@@ -22,13 +27,9 @@ def NN_model(input_csv, output_csv):
     scaled_x = scaler.fit_transform(x)
     scaled_y = scaler.fit_transform(y)
 
-    rows_df = df.shape[0]
-    len_train = int(rows_df * 0.7)
-
-    x_train = scaled_x[:len_train, :]
-    x_test = scaled_x[len_train:, :]
-    y_train = scaled_y[:len_train, :]
-    y_test = scaled_y[len_train:, :]
+    # shuffle and split
+    x_train, x_test, y_train, y_test = train_test_split(scaled_x, scaled_y, shuffle=True, random_state=42,
+                                                        train_size=0.7)
 
     x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
     x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
@@ -81,7 +82,7 @@ def NN_model(input_csv, output_csv):
 
     # root means square error values
     rms = np.sqrt(np.mean(np.power((y_test - preds), 2)))
-    print(rms)
+    print("Root means quared error: ", rms)
 
     # plotting the training data and new Predictions
     plt.plot(y_test[:, 0])
@@ -91,9 +92,11 @@ def NN_model(input_csv, output_csv):
     plt.legend(handles=[blue_patch, orange_patch])
     plt.show()
 
-    score = model.evaluate(x_test, y_test, verbose=0)
-    print('Test loss:', score[0])
-    print('Test accuracy:', score[1])
+    loss = model.evaluate(x_test, y_test, verbose=0)
+    print("Loss:", loss)
+    print("Max error:", max_error(y_test.reshape(-1, 1), preds.reshape(-1, 1)))
+    print("Mean Absolute error:", mean_absolute_error(y_test.reshape(-1, 1), preds.reshape(-1, 1)))
+    print("Mean Squared error:", mean_squared_error(y_test.reshape(-1, 1), preds.reshape(-1, 1)))
 
 
 if __name__ == '__main__':
@@ -104,4 +107,4 @@ if __name__ == '__main__':
     prices_and_consumptions_file = "./datas/prices_and_consumptions.csv"
     NN_datas_file = "./datas/NN_datas.csv"
     NN_result_file = './datas/NN_results.csv'
-    NN_model(NN_datas_file, NN_result_file)
+    NN_model(NN_datas_file, NN_result_file, True)
