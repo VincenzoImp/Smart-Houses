@@ -39,6 +39,28 @@ def hypermodel_builder(hp):
     return model
 
 
+def evaluate(model, preds, x_test, y_test):
+    loss = model.evaluate(x_test[:, 1:].astype('float64'), y_test, verbose=0)
+    param_max_error = max_error(y_test.reshape(-1, 1), preds.reshape(-1, 1))
+    param_mean_absolute_error = mean_absolute_error(y_test.reshape(-1, 1), preds.reshape(-1, 1))
+    param_mean_squared_error = mean_squared_error(y_test.reshape(-1, 1), preds.reshape(-1, 1))
+
+    return loss, param_max_error, param_mean_absolute_error, param_mean_squared_error
+
+
+def plot(preds, y_test, output):
+    fig, ax = plt.subplots()
+    ax.plot(y_test[0::2, 0], preds[0::2, 0], 'r.', alpha=0.5, label="hour + 1")
+    ax.plot(y_test[0::2, 5], preds[0::2, 5], 'b.', alpha=0.5, label="hour + 6")
+    ax.plot(y_test[0::2, 11], preds[0::2, 11], 'g.', alpha=0.5, label="hour + 12")
+    ax.plot(np.linspace(0, 1), np.linspace(0, 1), linestyle="dashed")
+    ax.set_ylabel("predicted")
+    ax.set_xlabel("real")
+    ax.legend()
+    fig.savefig(output, dpi=1200)
+    fig.clf()
+
+
 def LongShortTermMemory(input_csv, output_baseline_csv, output_hypermodel_csv, is_test=False):
     scaler = MinMaxScaler(feature_range=(0, 1))
 
@@ -116,22 +138,10 @@ def LongShortTermMemory(input_csv, output_baseline_csv, output_hypermodel_csv, i
     print("Root means squared error: ", rms)
 
     # plotting the training data and new Predictions
-    plt.plot(y_test[0::2, 0], preds[0::2, 0], 'r.', alpha=0.5, label="hour + 1")
-    plt.plot(y_test[0::2, 5], preds[0::2, 5], 'b.', alpha=0.5, label="hour + 6")
-    plt.plot(y_test[0::2, 11], preds[0::2, 11], 'g.', alpha=0.5, label="hour + 12")
-    array = np.linspace(0, 1)
-    plt.plot(array, array, linestyle="dashed")
-    plt.ylabel("predicted")
-    plt.xlabel("real")
-    plt.legend()
-    plt.show()
+    plot(preds, y_test, "datas/plot/baseline_model.svg")
 
-    loss = model.evaluate(x_test[:, 1:].astype('float64'), y_test, verbose=0)
-    print("Baseline model")
-    print("Loss:", loss)
-    print("Max error:", max_error(y_test.reshape(-1, 1), preds.reshape(-1, 1)))
-    print("Mean Absolute error:", mean_absolute_error(y_test.reshape(-1, 1), preds.reshape(-1, 1)))
-    print("Mean Squared error:", mean_squared_error(y_test.reshape(-1, 1), preds.reshape(-1, 1)))
+    base_loss, base_max_error, base_mean_absolute_error, base_mean_squared_error = evaluate(model, preds, x_test,
+                                                                                            y_test)
 
     # Instantiate the tuner
     tuner = kt.Hyperband(hypermodel_builder,  # the hypermodel
@@ -155,7 +165,8 @@ def LongShortTermMemory(input_csv, output_baseline_csv, output_hypermodel_csv, i
 
     print(model.summary())
 
-    model.fit(x_train[:, 1:], y_train, epochs=10, validation_data=(x_test[:, 1:], y_test))
+    model.fit(x_train[:, 1:].astype('float64'), y_train, epochs=10,
+              validation_data=(x_test[:, 1:].astype('float64'), y_test))
 
     preds = model.predict(x_test[:, 1:].astype('float64'))
 
@@ -200,19 +211,17 @@ def LongShortTermMemory(input_csv, output_baseline_csv, output_hypermodel_csv, i
     print("Root means squared error: ", rms)
 
     # plotting the training data and new Predictions
-    plt.plot(y_test[0::2, 0], preds[0::2, 0], 'r.', alpha=0.5, label="hour + 1")
-    plt.plot(y_test[0::2, 5], preds[0::2, 5], 'b.', alpha=0.5, label="hour + 6")
-    plt.plot(y_test[0::2, 11], preds[0::2, 11], 'g.', alpha=0.5, label="hour + 12")
-    array = np.linspace(0, 1)
-    plt.plot(array, array, linestyle="dashed")
-    plt.ylabel("predicted from hypermodel")
-    plt.xlabel("real")
-    plt.legend()
-    plt.show()
+    plot(preds, y_test, "datas/plot/hyper_model.svg")
 
-    loss = model.evaluate(x_test[:, 1:].astype('float64'), y_test, verbose=0)
-    print("Baseline model")
-    print("Loss:", loss)
-    print("Max error:", max_error(y_test.reshape(-1, 1), preds.reshape(-1, 1)))
-    print("Mean Absolute error:", mean_absolute_error(y_test.reshape(-1, 1), preds.reshape(-1, 1)))
-    print("Mean Squared error:", mean_squared_error(y_test.reshape(-1, 1), preds.reshape(-1, 1)))
+    hyper_loss, hyper_max_error, hyper_mean_absolute_error, hyper_mean_squared_error = evaluate(model, preds, x_test,
+                                                                                                y_test)
+
+    print("EVALUATION")
+    print("Base model loss:", base_loss)
+    print("Hypermodel loss:", hyper_loss)
+    print("Base model max error:", base_max_error)
+    print("Hypermodel max error:", hyper_max_error)
+    print("Base model MAE:", base_mean_absolute_error)
+    print("Hyper model MAE:", hyper_mean_absolute_error)
+    print("Base model MSE:", base_mean_squared_error)
+    print("Hyper model MSE:", hyper_mean_squared_error)
