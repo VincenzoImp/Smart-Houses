@@ -1,19 +1,47 @@
 import csv
 
 import keras_tuner as kt
-import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from keras.layers import Dense, LSTM
+from keras.layers import Dense, LSTM, Flatten
 from keras.models import Sequential
 from sklearn.metrics import max_error, mean_squared_error
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.metrics import RootMeanSquaredError
+from tensorflow.keras.optimizers import Adam
+from tensorflow.python.keras.layers import Dropout
 
 
-def scale_and_split_dataset(input_csv, scaler, is_test=False):
+def hypermodel_builder(hp):
+    model = Sequential()
+    model.add(LSTM(units=hp.Int('units', min_value=32, max_value=512, step=32),
+                   return_sequences=True,
+                   input_shape=(51, 1)))
+
+    model.add(Dropout(hp.Float('Dropout_rate', min_value=0, max_value=0.5, step=0.1)))
+
+    for i in range(hp.Int('n_layers', 1, 4)):
+        model.add(LSTM(units=hp.Int('units', min_value=32, max_value=512, step=32), return_sequences=True))
+
+    model.add(Dropout(hp.Float('Dropout_rate', min_value=0, max_value=0.5, step=0.1)))
+
+    model.add(Flatten())
+
+    model.add(Dense(12, activation=hp.Choice('dense_activation', values=['relu', 'sigmoid'], default='relu')))
+
+    # Tune the learning rate for the optimizer
+    model.compile(optimizer=Adam(lr=hp.Choice('learning_rate', values=[1e-2, 1e-3, 1e-4])), loss=['mean_squared_error'],
+                  metrics=[RootMeanSquaredError()])
+    return model
+
+
+def LongShortTermMemory(input_csv, output_baseline_csv, output_hypermodel_csv, is_test=False):
+    scaler = MinMaxScaler(feature_range=(0, 1))
+
     features = ['energy_price_ahead_' + str(n) for n in range(50, -1, -1)]
     class_labels = ['energy_price_forward_' + str(n) for n in range(1, 13)]
 
@@ -24,57 +52,36 @@ def scale_and_split_dataset(input_csv, scaler, is_test=False):
     x = df[features]
     y = df[class_labels]
 
-    scaled_x = scaler.fit_transform(x)
+    scaled_x = (pd.DataFrame(df['timestamp']).join(pd.DataFrame(scaler.fit_transform(x)))).to_numpy()
     scaled_y = scaler.fit_transform(y)
 
-    # shuffle and split into train (60%), test (20%), validation (20%)
     x_train, x_test, y_train, y_test = train_test_split(scaled_x, scaled_y, shuffle=True, random_state=42,
                                                         test_size=0.2)
-    x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, shuffle=True, random_state=42,
-                                                      test_size=0.25)
-
     x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
     x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
-    x_val = np.reshape(x_val, (x_val.shape[0], x_val.shape[1], 1))
 
     y_train = np.reshape(y_train, (y_train.shape[0], y_train.shape[1], 1))
-    y_val = np.reshape(y_val, (y_val.shape[0], y_val.shape[1], 1))
 
-    return x_train, x_test, y_train, y_test, x_val, y_val
-
-
-def build_model(x_train, y_train):
+    # baseline model
     model = Sequential()
-    model.add(LSTM(units=50, return_sequences=True, input_shape=(x_train.shape[1], 1)))
+    model.add(LSTM(units=50, return_sequences=True, input_shape=(51, 1)))
+    model.add(Dropout(0.5))
     model.add(LSTM(units=50))
-    model.add(Dense(y_train.shape[1]))
-    model.compile(optimizer='adam', loss='mean_squared_error')
-    model.fit(x_train, y_train, epochs=10, batch_size=1, verbose=2)
-    return model
+    model.add(Dropout(0.5))
+    model.add(Dense(12))
+    model.compile(optimizer='adam', loss=['mean_squared_error'])
 
+    model.fit(x_train[:, 1:].astype('float64'), y_train, epochs=10, batch_size=32, verbose=2)
 
-def LongShortTermMemory(input_csv, output_csv, is_test=False):
-    scaler = MinMaxScaler(feature_range=(0, 1))
+    preds = model.predict(x_test[:, 1:].astype('float64'))
 
-    x_train, x_test, y_train, y_test, x_val, y_val = scale_and_split_dataset(input_csv, scaler, is_test)
+    # undo scaler to save them?
+    # preds = scaler.inverse_transform(preds)
+    # y_test = scaler.inverse_transform(y_test)
 
-    model = build_model(x_train, y_train)
-
-    # Hyperparameters tuning
-    tuner = kt.RandomSearch(model, objective='val_loss', max_trials=20)
-    tuner.search(x_train, y_train, epochs=5, validation_data=(x_val, y_val))
-    best_model = tuner.get_best_models()[0]
-
-    print(best_model)
-
-    preds = model.predict(x_test)
-    preds = scaler.transform(preds)
-    y_test = scaler.transform(y_test)
-    preds /= 100
-    y_test /= 100
-
-    with open(output_csv, "w") as file_obj:
+    with open(output_baseline_csv, "w") as file_obj:
         csv.writer(file_obj).writerow([
+            "timestamp",
             "predictions01",
             "predictions02",
             "predictions03",
@@ -101,23 +108,110 @@ def LongShortTermMemory(input_csv, output_csv, is_test=False):
             "reals12"
         ])
         for index in range(preds.shape[0]):
-            row = np.concatenate([preds[index, :], y_test[index, :]])
+            row = np.concatenate([x_test[index, 0], preds[index, :], y_test[index, :]])
             row = map(str, row)
             csv.writer(file_obj).writerow(row)
-
     # root means square error values
     rms = np.sqrt(np.mean(np.power((y_test - preds), 2)))
-    print("Root means quared error: ", rms)
+    print("Root means squared error: ", rms)
 
     # plotting the training data and new Predictions
-    plt.plot(y_test[:, 0])
-    plt.plot(preds[:, 0])
-    blue_patch = mpatches.Patch(color='#5497c5', label='y_test')
-    orange_patch = mpatches.Patch(color='#ff902e', label='preds')
-    plt.legend(handles=[blue_patch, orange_patch])
+    plt.plot(y_test[0::2, 0], preds[0::2, 0], 'r.', alpha=0.5, label="hour + 1")
+    plt.plot(y_test[0::2, 5], preds[0::2, 5], 'b.', alpha=0.5, label="hour + 6")
+    plt.plot(y_test[0::2, 11], preds[0::2, 11], 'g.', alpha=0.5, label="hour + 12")
+    array = np.linspace(0, 1)
+    plt.plot(array, array, linestyle="dashed")
+    plt.ylabel("predicted")
+    plt.xlabel("real")
+    plt.legend()
     plt.show()
 
-    loss = model.evaluate(x_test, y_test, verbose=0)
+    loss = model.evaluate(x_test[:, 1:].astype('float64'), y_test, verbose=0)
+    print("Baseline model")
+    print("Loss:", loss)
+    print("Max error:", max_error(y_test.reshape(-1, 1), preds.reshape(-1, 1)))
+    print("Mean Absolute error:", mean_absolute_error(y_test.reshape(-1, 1), preds.reshape(-1, 1)))
+    print("Mean Squared error:", mean_squared_error(y_test.reshape(-1, 1), preds.reshape(-1, 1)))
+
+    # Instantiate the tuner
+    tuner = kt.Hyperband(hypermodel_builder,  # the hypermodel
+                         kt.Objective("root_mean_squared_error", direction="min"),  # objective to optimize
+                         max_epochs=10,
+                         factor=3,
+                         directory='output',  # directory to save logs
+                         project_name='LSTM Regressor Trials')
+
+    tuner.search_space_summary()
+
+    callback = EarlyStopping(monitor='loss', patience=3)
+
+    # Perform hypertuning
+    tuner.search(x_train[:, 1:].astype('float64'), y_train, validation_split=0.2, callbacks=[callback])
+    best_hyperparameters = tuner.get_best_hyperparameters(1)[0]
+
+    print(best_hyperparameters)
+
+    model = tuner.get_best_models(num_models=1)[0]
+
+    print(model.summary())
+
+    model.fit(x_train[:, 1:], y_train, epochs=10, validation_data=(x_test[:, 1:], y_test))
+
+    preds = model.predict(x_test[:, 1:].astype('float64'))
+
+    # undo scaler to save them?
+    # preds = scaler.inverse_transform(preds)
+    # y_test = scaler.inverse_transform(y_test)
+
+    with open(output_hypermodel_csv, "w") as file_obj:
+        csv.writer(file_obj).writerow([
+            "timestamp",
+            "predictions01",
+            "predictions02",
+            "predictions03",
+            "predictions04",
+            "predictions05",
+            "predictions06",
+            "predictions07",
+            "predictions08",
+            "predictions09",
+            "predictions10",
+            "predictions11",
+            "predictions12",
+            "reals01",
+            "reals02",
+            "reals03",
+            "reals04",
+            "reals05",
+            "reals06",
+            "reals07",
+            "reals08",
+            "reals09",
+            "reals10",
+            "reals11",
+            "reals12"
+        ])
+        for index in range(preds.shape[0]):
+            row = np.concatenate([x_test[index, 0], preds[index, :], y_test[index, :]])
+            row = map(str, row)
+            csv.writer(file_obj).writerow(row)
+    # root means square error values
+    rms = np.sqrt(np.mean(np.power((y_test - preds), 2)))
+    print("Root means squared error: ", rms)
+
+    # plotting the training data and new Predictions
+    plt.plot(y_test[0::2, 0], preds[0::2, 0], 'r.', alpha=0.5, label="hour + 1")
+    plt.plot(y_test[0::2, 5], preds[0::2, 5], 'b.', alpha=0.5, label="hour + 6")
+    plt.plot(y_test[0::2, 11], preds[0::2, 11], 'g.', alpha=0.5, label="hour + 12")
+    array = np.linspace(0, 1)
+    plt.plot(array, array, linestyle="dashed")
+    plt.ylabel("predicted from hypermodel")
+    plt.xlabel("real")
+    plt.legend()
+    plt.show()
+
+    loss = model.evaluate(x_test[:, 1:].astype('float64'), y_test, verbose=0)
+    print("Baseline model")
     print("Loss:", loss)
     print("Max error:", max_error(y_test.reshape(-1, 1), preds.reshape(-1, 1)))
     print("Mean Absolute error:", mean_absolute_error(y_test.reshape(-1, 1), preds.reshape(-1, 1)))

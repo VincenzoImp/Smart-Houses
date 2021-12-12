@@ -1,5 +1,6 @@
 import sys
 
+from DataPreprocessing import k_nearest_neighborhood, format_correctly, for_each_home, prepare_NN_data
 from LongShortTermMemory import LongShortTermMemory
 
 if __name__ == '__main__':
@@ -9,21 +10,22 @@ if __name__ == '__main__':
     folder = "./datas/muratori_5"
     prices_and_consumptions_file = "./datas/prices_and_consumptions.csv"
     NN_datas_file = "./datas/NN_datas.csv"
-    NN_result_file = './datas/NN_results.csv'
+    NN_baseline_result_file = './datas/NN_baseline_results.csv'
+    NN_hypermodel_result_file = './datas/NN_hypermodel_results.csv'
 
-    # print('Process Energy 60')
-    # k_nearest_neighborhood(energy_price_file)
-    # format_correctly(energy_price_file)
-    #
-    # print('get_new_profiles')
-    # for_each_home(folder, energy_price_file, profiles_file, new_profiles_file)
-    #
-    # print('get_NN_datas')
-    # prepare_NN_data(energy_price_file, NN_datas_file)
+    print('Process Energy 60')
+    k_nearest_neighborhood(energy_price_file)
+    format_correctly(energy_price_file)
+
+    print('get_new_profiles')
+    for_each_home(folder, energy_price_file, profiles_file, new_profiles_file)
+
+    print('get_NN_datas')
+    prepare_NN_data(energy_price_file, NN_datas_file)
 
     print('NNmodel')
     # from command line, choose to select test mode (=True) or not
     if len(sys.argv) < 2:
-        LongShortTermMemory(NN_datas_file, NN_result_file)
+        LongShortTermMemory(NN_datas_file, NN_baseline_result_file, NN_hypermodel_result_file)
     else:
-        LongShortTermMemory(NN_datas_file, NN_result_file, sys.argv[1])
+        LongShortTermMemory(NN_datas_file, NN_baseline_result_file, NN_hypermodel_result_file, sys.argv[1])
