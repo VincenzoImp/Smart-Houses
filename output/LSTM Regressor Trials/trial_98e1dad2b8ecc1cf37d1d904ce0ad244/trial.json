@@ -1,1 +1,133 @@
-{"trial_id": "98e1dad2b8ecc1cf37d1d904ce0ad244", "hyperparameters": {"space": [{"class_name": "Int", "config": {"name": "units", "default": null, "conditions": [], "min_value": 32, "max_value": 512, "step": 32, "sampling": null}}, {"class_name": "Float", "config": {"name": "Dropout_rate", "default": 0.0, "conditions": [], "min_value": 0.0, "max_value": 0.5, "step": 0.1, "sampling": null}}, {"class_name": "Int", "config": {"name": "n_layers", "default": null, "conditions": [], "min_value": 1, "max_value": 4, "step": 1, "sampling": null}}, {"class_name": "Choice", "config": {"name": "dense_activation", "default": "relu", "conditions": [], "values": ["relu", "sigmoid"], "ordered": false}}, {"class_name": "Choice", "config": {"name": "learning_rate", "default": 0.01, "conditions": [], "values": [0.01, 0.001, 0.0001], "ordered": true}}], "values": {"units": 160, "Dropout_rate": 0.2, "n_layers": 2, "dense_activation": "sigmoid", "learning_rate": 0.001, "tuner/epochs": 10, "tuner/initial_epoch": 4, "tuner/bracket": 1, "tuner/round": 1, "tuner/trial_id": "a78402dc1056e5aa7ad68020c072e64a"}}, "metrics": {"metrics": {"loss": {"direction": "min", "observations": [{"value": [0.0016530371503904462], "step": 0}]}, "root_mean_squared_error": {"direction": "min", "observations": [{"value": [0.040657561272382736], "step": 0}]}, "val_loss": {"direction": "min", "observations": [{"value": [0.0016605192795395851], "step": 0}]}, "val_root_mean_squared_error": {"direction": "min", "observations": [{"value": [0.04074947163462639], "step": 0}]}}}, "score": 0.040657561272382736, "best_step": 0, "status": "COMPLETED"}
+{
+  "trial_id": "98e1dad2b8ecc1cf37d1d904ce0ad244",
+  "hyperparameters": {
+    "space": [
+      {
+        "class_name": "Int",
+        "config": {
+          "name": "units",
+          "default": null,
+          "conditions": [],
+          "min_value": 32,
+          "max_value": 512,
+          "step": 32,
+          "sampling": null
+        }
+      },
+      {
+        "class_name": "Float",
+        "config": {
+          "name": "Dropout_rate",
+          "default": 0.0,
+          "conditions": [],
+          "min_value": 0.0,
+          "max_value": 0.5,
+          "step": 0.1,
+          "sampling": null
+        }
+      },
+      {
+        "class_name": "Int",
+        "config": {
+          "name": "n_layers",
+          "default": null,
+          "conditions": [],
+          "min_value": 1,
+          "max_value": 4,
+          "step": 1,
+          "sampling": null
+        }
+      },
+      {
+        "class_name": "Choice",
+        "config": {
+          "name": "dense_activation",
+          "default": "relu",
+          "conditions": [],
+          "values": [
+            "relu",
+            "sigmoid"
+          ],
+          "ordered": false
+        }
+      },
+      {
+        "class_name": "Choice",
+        "config": {
+          "name": "learning_rate",
+          "default": 0.01,
+          "conditions": [],
+          "values": [
+            0.01,
+            0.001,
+            0.0001
+          ],
+          "ordered": true
+        }
+      }
+    ],
+    "values": {
+      "units": 160,
+      "Dropout_rate": 0.2,
+      "n_layers": 2,
+      "dense_activation": "sigmoid",
+      "learning_rate": 0.001,
+      "tuner/epochs": 10,
+      "tuner/initial_epoch": 4,
+      "tuner/bracket": 1,
+      "tuner/round": 1,
+      "tuner/trial_id": "a78402dc1056e5aa7ad68020c072e64a"
+    }
+  },
+  "metrics": {
+    "metrics": {
+      "loss": {
+        "direction": "min",
+        "observations": [
+          {
+            "value": [
+              0.0016530371503904462
+            ],
+            "step": 0
+          }
+        ]
+      },
+      "root_mean_squared_error": {
+        "direction": "min",
+        "observations": [
+          {
+            "value": [
+              0.040657561272382736
+            ],
+            "step": 0
+          }
+        ]
+      },
+      "val_loss": {
+        "direction": "min",
+        "observations": [
+          {
+            "value": [
+              0.0016605192795395851
+            ],
+            "step": 0
+          }
+        ]
+      },
+      "val_root_mean_squared_error": {
+        "direction": "min",
+        "observations": [
+          {
+            "value": [
+              0.04074947163462639
+            ],
+            "step": 0
+          }
+        ]
+      }
+    }
+  },
+  "score": 0.040657561272382736,
+  "best_step": 0,
+  "status": "COMPLETED"
+}
