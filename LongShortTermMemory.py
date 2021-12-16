@@ -78,8 +78,8 @@ def LongShortTermMemory(input_csv, output_baseline_csv, output_hypermodel_csv, i
     scaled_x = (pd.DataFrame(df['timestamp']).join(pd.DataFrame(scaler.fit_transform(x)))).to_numpy()
     scaled_y = scaler.fit_transform(y)
 
-    x_train, x_test, y_train, y_test = train_test_split(scaled_x, scaled_y, shuffle=True, random_state=42,
-                                                        test_size=0.2)
+    x_train, x_test, y_train, y_test = train_test_split(scaled_x, scaled_y, shuffle=False, random_state=42,
+                                                        test_size=0.3)
     x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
     x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
 
