@@ -99,8 +99,8 @@ def LongShortTermMemory(input_csv, output_baseline_csv, output_hypermodel_csv, i
     preds = model.predict(x_test[:, 1:].astype('float64'))
 
     # undo scaling to save them
-    preds = scaler.inverse_transform(preds)
-    y_test = scaler.inverse_transform(y_test)
+    preds_normal = scaler.inverse_transform(preds)
+    y_test_normal = scaler.inverse_transform(y_test)
 
     with open(output_baseline_csv, "w") as file_obj:
         csv.writer(file_obj).writerow([
@@ -130,8 +130,8 @@ def LongShortTermMemory(input_csv, output_baseline_csv, output_hypermodel_csv, i
             "reals11",
             "reals12"
         ])
-        for index in range(preds.shape[0]):
-            row = np.concatenate([x_test[index, 0], preds[index, :], y_test[index, :]])
+        for index in range(preds_normal.shape[0]):
+            row = np.concatenate([x_test[index, 0], preds_normal[index, :], y_test_normal[index, :]])
             row = map(str, row)
             csv.writer(file_obj).writerow(row)
     # root means square error values
@@ -171,8 +171,8 @@ def LongShortTermMemory(input_csv, output_baseline_csv, output_hypermodel_csv, i
 
     preds = model.predict(x_test[:, 1:].astype('float64'))
 
-    preds = scaler.inverse_transform(preds)
-    y_test = scaler.inverse_transform(y_test)
+    preds_normal = scaler.inverse_transform(preds)
+    y_test_normal = scaler.inverse_transform(y_test)
 
     with open(output_hypermodel_csv, "w") as file_obj:
         csv.writer(file_obj).writerow([
@@ -202,8 +202,8 @@ def LongShortTermMemory(input_csv, output_baseline_csv, output_hypermodel_csv, i
             "reals11",
             "reals12"
         ])
-        for index in range(preds.shape[0]):
-            row = np.concatenate([x_test[index, 0], preds[index, :], y_test[index, :]])
+        for index in range(preds_normal.shape[0]):
+            row = np.concatenate([x_test[index, 0], preds_normal[index, :], y_test_normal[index, :]])
             row = map(str, row)
             csv.writer(file_obj).writerow(row)
     # root means square error values
