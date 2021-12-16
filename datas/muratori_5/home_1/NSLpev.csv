@@ -1,0 +1,2 @@
+battery_capacity_kwh,charge_speed_kw,discharge_speed_kw,charge_factor_in_0_1,discharge_factor_in_0_1,min_perc_soc
+16.000000,3.6,3.6,0.876000,0.876000,0

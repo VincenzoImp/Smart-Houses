@@ -1,5 +1,10 @@
+from libraries import csv, pd, os, datetime, re
+
+
 class DP_Battery(object):
+
     class Info(object):
+    
         def __init__(self, value=0.0, first_action=-1):
             self.value = value
             self.first_action = first_action
@@ -8,9 +13,10 @@ class DP_Battery(object):
             self.value = info_obj.value
             self.first_action = info_obj.first_action
 
-    def __init__(self, id, beta, current_state_of_charge, max_capacity, min_energy_demand, max_energy_demand,
+    def __init__(self, simulation, id, beta, current_state_of_charge, max_capacity, min_energy_demand, max_energy_demand,
                  action_number, state_number, column_info=None,
                  working_hours="([0-9]|1[0-9]|2[0-3])$"):  # si assume che action_number >=2
+        self.simulation = simulation
         self.id = id
         self.beta = beta
         self.current_state_of_charge = current_state_of_charge
@@ -23,7 +29,7 @@ class DP_Battery(object):
         self.working_hours = working_hours
         self.action_list = self.initialize_action_list(
             action_number)  # min e max energy demand ci sono sempre per costruzione
-        self.filename = os.path.join(directory, str(self.id) + ".csv")
+        self.filename = os.path.join(self.simulation.directory, str(self.id) + ".csv")
         self.initialize_file()
         self.hours_of_charge = 0
         return
@@ -68,21 +74,21 @@ class DP_Battery(object):
         return state * (self.max_capacity / (self.state_number - 1))
 
     def get_reward(self, index, kwh, max_energy_demand):
-        value = (1 - p) * array_price[index] * kwh + p * (self.beta * ((kwh - max_energy_demand) ** 2)) + 0.00000001
+        value = (1 - self.simulation.home.p) * self.simulation.array_price[index] * kwh + self.simulation.home.p * (self.beta * ((kwh - max_energy_demand) ** 2)) + 0.00000001
         return 1 / value
 
     def update_history(self, E, U, time):
         with open(self.filename, "a") as file_object:
-            if re.match(self.working_hours, str(current_hour)):
-                csv.writer(file_object).writerow([timestamp, "on", E, U, time, self.current_state_of_charge])
+            if re.match(self.working_hours, str(self.simulation.current_hour)):
+                csv.writer(file_object).writerow([self.simulation.timestamp, "on", E, U, time, self.current_state_of_charge])
             else:
-                csv.writer(file_object).writerow([timestamp, "off", 0, 0, 0, -1])
+                csv.writer(file_object).writerow([self.simulation.timestamp, "off", 0, 0, 0, -1])
         return
 
-    def update_data(self, house_profile_DF):
+    def update_data(self):
         if self.column_info != None:
-            input_state_of_charge = house_profile_DF.at[count_row, self.column_info[0]]
-            hours_of_charge = house_profile_DF.at[count_row, self.column_info[1]]
+            input_state_of_charge = self.simulation.house_profile_DF.at[self.simulation.count_row, self.column_info[0]]
+            hours_of_charge = self.simulation.house_profile_DF.at[self.simulation.count_row, self.column_info[1]]
             if input_state_of_charge == -1:
                 self.working_hours = "(-1)$"
                 self.current_state_of_charge = -1
@@ -99,7 +105,7 @@ class DP_Battery(object):
         time = datetime.datetime.now()
         E = 0.0
         U = 0.0
-        if re.match(self.working_hours, str(current_hour)):
+        if re.match(self.working_hours, str(self.simulation.current_hour)):
             tmp_info = self.Info()
             action_zero = self.action_list.index(0.0)
             len_x = self.hours_of_charge + 1
@@ -139,15 +145,15 @@ class DP_Battery(object):
                     action + 1] > self.max_capacity:  # niente index out of range per costruzione
                     E = min(self.max_energy_demand,
                             self.max_capacity - self.current_state_of_charge)  # a causa di un'assenza di totale liberta' di range, quando la action genera kwh == 0 allora "rabbocco" kwh al current_max_energy_demand
-            U = (1 - p) * array_price[0] * E + p * (self.beta * ((E - self.max_energy_demand) ** 2))
+            U = (1 - self.simulation.home.p) * self.simulation.array_price[0] * E + self.simulation.home.p * (self.beta * ((E - self.max_energy_demand) ** 2))
             self.current_state_of_charge += E
         time = datetime.datetime.now() - time
         self.update_history(E, U, time)
         return E, U
 
 
-def insert_DP_Battery(device_list, path_dir_home):
-    battery_DF = pd.read_csv(os.path.join(path_dir_home, "DPpev.csv"))
+def insert_DP_Battery(simulation):
+    battery_DF = pd.read_csv(os.path.join(simulation.home.path_dir_home, "DPpev.csv"))
     row_index = 0
     while True:
         try:
@@ -160,9 +166,9 @@ def insert_DP_Battery(device_list, path_dir_home):
         state_number = int(row["state_number"])
         beta = float(row["beta"])
         max_capacity = float(row["battery_capacity_kwh"])
-        new_battery = DP_Battery("DP_Battery." + str(row_index), beta, 0, max_capacity, min_energy_demand,
+        new_battery = DP_Battery(simulation, "DP_Battery." + str(row_index), beta, 0, max_capacity, min_energy_demand,
                                  max_energy_demand, action_number, state_number,
                                  ("PEV_input_state_of_charge", "PEV_hours_of_charge"))
-        device_list.add(new_battery)
+        simulation.device_list.add(new_battery)
         row_index += 1
     return
