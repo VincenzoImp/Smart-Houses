@@ -53,7 +53,7 @@ def plot(preds, y_test, output):
     ax.plot(y_test[0::2, 0], preds[0::2, 0], 'r.', alpha=0.5, label="hour + 1")
     ax.plot(y_test[0::2, 5], preds[0::2, 5], 'b.', alpha=0.5, label="hour + 6")
     ax.plot(y_test[0::2, 11], preds[0::2, 11], 'g.', alpha=0.5, label="hour + 12")
-    ax.plot(np.linspace(min(y_test[:]), max(y_test[:])), np.linspace(min(y_test[:]), max(y_test[:])),
+    ax.plot(np.linspace(y_test.min(), y_test.max()), np.linspace(y_test.min(), y_test.max()),
             linestyle="dashed")
     ax.set_ylabel("predicted")
     ax.set_xlabel("real")
