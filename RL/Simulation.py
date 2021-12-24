@@ -1,25 +1,25 @@
-from NSL import *
-from NSL_Battery import *
-from SL import *
-from SL_Battery import *
 from CL import *
 from CL_Battery import *
 from DP_Battery import *
-from Naif_Battery import *
 from Home import Home
+from NSL import *
+from NSL_Battery import *
+from Naif_Battery import *
+from SL import *
+from SL_Battery import *
 from libraries import threading, os, csv, datetime, pd
 
 
 class Simulation(object):
 
     def __init__(self, home: Home, loops, one_memory, current_day=0, current_hour=0):
-        #simulation datas
+        # simulation datas
         self.home = home
         self.directory = ""
         self.device_list = set()
         self.current_day = current_day
         self.current_hour = current_hour
-        self.count_row = current_day*24 + current_hour
+        self.count_row = current_day * 24 + current_hour
         self.array_price = []
         self.timestamp = ""
         self.loops = loops
@@ -54,7 +54,7 @@ class Simulation(object):
             U = 0.0
             try:
                 self.timestamp = self.house_profile_DF.at[self.count_row, "timestamp"]
-                self.array_price = [1 for _ in range(12)] #self.energy_price_DF.at[self.count_row, :]
+                self.array_price = [1 for _ in range(12)]  # self.energy_price_DF.at[self.count_row, :]
             except:
                 break
             thread_list = []

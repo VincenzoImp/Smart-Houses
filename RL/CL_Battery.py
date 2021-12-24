@@ -4,9 +4,11 @@ from libraries import pd, csv, np, datetime, os, re
 
 class CL_Battery(Controlable_load):
 
-    def __init__(self, simualtion, id, beta, min_energy_demand, max_energy_demand, state_number, action_number, max_capacity,
+    def __init__(self, simualtion, id, beta, min_energy_demand, max_energy_demand, state_number, action_number,
+                 max_capacity,
                  current_state_of_charge=0, column_info=None, working_hours="([0-9]|1[0-9]|2[0-3])$"):
-        Controlable_load.__init__(self, simualtion, id, beta, min_energy_demand, max_energy_demand, state_number, action_number,
+        Controlable_load.__init__(self, simualtion, id, beta, min_energy_demand, max_energy_demand, state_number,
+                                  action_number,
                                   column_info, working_hours)
         self.max_capacity = max_capacity
         self.current_state_of_charge = current_state_of_charge
@@ -44,7 +46,8 @@ class CL_Battery(Controlable_load):
         return state
 
     def get_reward(self, index, kwh, max_energy_demand):
-        value = (1 - self.simulation.home.p) * self.simulation.array_price[index] * kwh + self.simulation.home.p * (self.beta * ((kwh - max_energy_demand) ** 2)) + 0.0000001
+        value = (1 - self.simulation.home.p) * self.simulation.array_price[index] * kwh + self.simulation.home.p * (
+                    self.beta * ((kwh - max_energy_demand) ** 2)) + 0.0000001
         return 1 / value
 
     def chose_action(self, hour, state, state_of_charge, randomless=False):
@@ -60,14 +63,16 @@ class CL_Battery(Controlable_load):
     def update_history(self, E, U, time):
         with open(self.filename, "a") as file_object:
             if re.match(self.working_hours, str(self.simulation.current_hour)):
-                csv.writer(file_object).writerow([self.simulation.timestamp, "on", E, U, time, self.current_state_of_charge])
+                csv.writer(file_object).writerow(
+                    [self.simulation.timestamp, "on", E, U, time, self.current_state_of_charge])
             else:
                 csv.writer(file_object).writerow([self.simulation.timestamp, "off", 0, 0, 0, -1])
         return
 
     def update_data(self):
         if self.column_info != None:
-            new_current_state_of_charge = self.simulation.house_profile_DF.at[self.simulation.count_row, self.column_info]
+            new_current_state_of_charge = self.simulation.house_profile_DF.at[
+                self.simulation.count_row, self.column_info]
             if new_current_state_of_charge == -1:
                 self.working_hours = "(-1)$"
                 self.current_state_of_charge = -1
@@ -79,7 +84,7 @@ class CL_Battery(Controlable_load):
         return
 
     def check_convergence(self, last_Q):
-        
+
         return
 
     def function(self):
@@ -91,8 +96,8 @@ class CL_Battery(Controlable_load):
         if re.match(self.working_hours, str(self.simulation.current_hour)):
             if not self.simulation.one_memory:
                 self.Q = np.zeros((24, self.state_number, self.action_number), dtype=float)
-            #last_Q = self.Q.copy()
-            while i < self.simulation.home.loops:#(self.simulation.loops != None and i < self.simulation.loops) or self.simulation.loops == None:
+            # last_Q = self.Q.copy()
+            while i < self.simulation.home.loops:  # (self.simulation.loops != None and i < self.simulation.loops) or self.simulation.loops == None:
                 index = 0
                 hour = self.simulation.current_hour
                 state = self.get_state(self.current_state_of_charge)
@@ -120,7 +125,7 @@ class CL_Battery(Controlable_load):
                     t += 1
                     index += 1
                 i += 1
-                #if self.simulation.loops == None and self.check_convergence(last_Q):
+                # if self.simulation.loops == None and self.check_convergence(last_Q):
                 #    break
             action = self.chose_action(self.simulation.current_hour, self.get_state(self.current_state_of_charge),
                                        self.current_state_of_charge, True)
@@ -131,7 +136,8 @@ class CL_Battery(Controlable_load):
                     E = min(self.max_energy_demand,
                             self.max_capacity - self.current_state_of_charge)  # a causa di un'assenza di totale liberta' di range, quando la action genera E == 0 allora "rabbocco" E al current_max_energy_demand
             local_max_energy_demand = min(self.max_energy_demand, self.max_capacity - self.current_state_of_charge)
-            U = (1 - self.simulation.home.p) * self.simulation.array_price[0] * E + self.simulation.home.p * (self.beta * ((E - local_max_energy_demand) ** 2))
+            U = (1 - self.simulation.home.p) * self.simulation.array_price[0] * E + self.simulation.home.p * (
+                        self.beta * ((E - local_max_energy_demand) ** 2))
             self.current_state_of_charge += E
         time = datetime.datetime.now() - time
         self.update_history(E, U, time)

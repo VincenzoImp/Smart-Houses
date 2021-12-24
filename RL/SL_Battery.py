@@ -7,7 +7,8 @@ class SL_Battery(Shiftable_load):
     def __init__(self, simulation, id, k, max_capacity, current_state_of_charge, Tne, state_number, energy_demand=0,
                  column_info=None, Tini=0, Tend=23,
                  working_hours="([0-9]|1[0-9]|2[0-3])$"):  # Tini, Tw, Tend devono rispettare i vincoli descritti nell'articolo e dovrebbero matchare con working_hours
-        Shiftable_load.__init__(self, simulation, id, k, Tne, state_number, energy_demand, column_info, Tini, Tend, working_hours)
+        Shiftable_load.__init__(self, simulation, id, k, Tne, state_number, energy_demand, column_info, Tini, Tend,
+                                working_hours)
         self.max_capacity = max_capacity
         self.current_state_of_charge = current_state_of_charge
         return
@@ -20,7 +21,8 @@ class SL_Battery(Shiftable_load):
     def update_history(self, E, U, time):
         with open(self.filename, "a") as file_object:
             if re.match(self.working_hours, str(self.simulation.current_hour)):
-                csv.writer(file_object).writerow([self.simulation.timestamp, "on", E, U, time, self.current_state_of_charge])
+                csv.writer(file_object).writerow(
+                    [self.simulation.timestamp, "on", E, U, time, self.current_state_of_charge])
             else:
                 csv.writer(file_object).writerow([self.simulation.timestamp, "off", 0, 0, 0, -1])
         return
@@ -65,7 +67,8 @@ class SL_Battery(Shiftable_load):
         E = 0.0
         U = 0.0
         i = 1
-        if re.match(self.working_hours, str(self.simulation.current_hour)):  # caso in cui posso stare nelle righe diverse da -1
+        if re.match(self.working_hours,
+                    str(self.simulation.current_hour)):  # caso in cui posso stare nelle righe diverse da -1
             if not self.simulation.home.one_memory:
                 self.Q = np.zeros((24, self.state_number, 2), dtype=float)
             while i < self.simulation.home.loops:
@@ -97,14 +100,16 @@ class SL_Battery(Shiftable_load):
                     hours_worked = new_hours_worked
                     state_of_charge = new_state_of_charge
                 i += 1
-            bin_action, self.Tw, self.hours_available, self.hours_worked = self.chose_action(self.simulation.current_hour,
-                                                                                             self.get_state(
-                                                                                                 self.current_state_of_charge),
-                                                                                             self.Tw,
-                                                                                             self.hours_available,
-                                                                                             self.hours_worked, True)
+            bin_action, self.Tw, self.hours_available, self.hours_worked = self.chose_action(
+                self.simulation.current_hour,
+                self.get_state(
+                    self.current_state_of_charge),
+                self.Tw,
+                self.hours_available,
+                self.hours_worked, True)
             E = min(self.max_capacity - self.current_state_of_charge, bin_action * self.energy_demand)
-            U = (1 - self.simulation.home.p) * self.simulation.array_price[0] * E + self.simulation.home.p * (self.k * (((self.Tw + 24) - self.Tini) % 24))
+            U = (1 - self.simulation.home.p) * self.simulation.array_price[0] * E + self.simulation.home.p * (
+                        self.k * (((self.Tw + 24) - self.Tini) % 24))
             self.current_state_of_charge += E
         time = datetime.datetime.now() - time
         self.update_history(E, U, time)
@@ -123,7 +128,8 @@ def insert_SL_Battery(simulation):
         max_capacity = float(row["battery_capacity_kwh"])
         state_number = int(row["state_number"])
         energy_demand = float(row["charge_speed_kw"])
-        new_battery = SL_Battery(simulation, "SL_Battery." + str(row_index), k, max_capacity, 0, 0, state_number, energy_demand,
+        new_battery = SL_Battery(simulation, "SL_Battery." + str(row_index), k, max_capacity, 0, 0, state_number,
+                                 energy_demand,
                                  ("PEV_input_state_of_charge", "PEV_hours_of_charge"))
         simulation.device_list.add(new_battery)
         row_index += 1

@@ -3,7 +3,8 @@ from libraries import csv, np, os, datetime, re
 
 class Controlable_load(object):
 
-    def __init__(self, simulation, id, beta, min_energy_demand, max_energy_demand, state_number, action_number, column_info=None,
+    def __init__(self, simulation, id, beta, min_energy_demand, max_energy_demand, state_number, action_number,
+                 column_info=None,
                  working_hours="([0-9]|1[0-9]|2[0-3])$"):  # si assume che action_number >=2
         self.simulation = simulation
         self.id = id
@@ -41,7 +42,8 @@ class Controlable_load(object):
         return action
 
     def get_reward(self, index, kwh):
-        value = (1 - self.simulation.home.p) * self.simulation.array_price[index] * kwh + self.simulation.home.p * (self.beta * ((kwh - self.max_energy_demand) ** 2)) + 0.0000001
+        value = (1 - self.simulation.home.p) * self.simulation.array_price[index] * kwh + self.simulation.home.p * (
+                    self.beta * ((kwh - self.max_energy_demand) ** 2)) + 0.0000001
         return 1 / value
 
     def get_state(self):
@@ -75,7 +77,8 @@ class Controlable_load(object):
         E = 0.0
         U = 0.0
         i = 1
-        if re.match(self.working_hours, str(self.simulation.current_hour)):  # caso in cui posso stare nelle righe diverse da -1
+        if re.match(self.working_hours,
+                    str(self.simulation.current_hour)):  # caso in cui posso stare nelle righe diverse da -1
             if not self.simulation.home.one_memory:
                 self.Q = np.zeros((24, self.state_number, self.action_number), dtype=float)
             while i < self.simulation.home.loops:
@@ -96,7 +99,8 @@ class Controlable_load(object):
                 i += 1
             action = self.chose_action(self.simulation.current_hour, self.get_state(), True)
             E = self.action_list[action]
-            U = (1 - self.simulation.home.p) * self.simulation.array_price[0] * E + self.simulation.home.p * (self.beta * ((E - self.max_energy_demand) ** 2))
+            U = (1 - self.simulation.home.p) * self.simulation.array_price[0] * E + self.simulation.home.p * (
+                        self.beta * ((E - self.max_energy_demand) ** 2))
         time = datetime.datetime.now() - time
         self.update_history(E, U, time)
         return E, U

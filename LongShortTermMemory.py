@@ -62,6 +62,17 @@ def plot(preds, y_test, output):
     fig.clf()
 
 
+def plot_loss(history, plot_name):
+    fig, ax = plt.subplots()
+    ax.plot(history.history['loss'])
+    ax.plot(history.history['val_loss'])
+    plt.ylabel('Loss')
+    plt.xlabel('epoch')
+    plt.legend(['Train loss', 'Validation loss'], loc='upper right')
+    fig.savefig("datas/plot/" + plot_name, dpi=1200)
+    fig.clf()
+
+
 def LongShortTermMemory(input_csv, output_baseline_csv, output_hypermodel_csv, is_test=False):
     scaler = MinMaxScaler(feature_range=(0, 1))
 
@@ -92,9 +103,12 @@ def LongShortTermMemory(input_csv, output_baseline_csv, output_hypermodel_csv, i
     model.add(LSTM(units=50))
     model.add(Dropout(0.5))
     model.add(Dense(12))
-    model.compile(optimizer='adam', loss=['mean_squared_error'])
+    model.compile(optimizer='adam', loss="mse")
 
-    model.fit(x_train[:, 1:].astype('float64'), y_train, epochs=10, batch_size=32, verbose=2)
+    base_history = model.fit(x_train[:, 1:].astype('float64'), y_train, epochs=10, batch_size=32, verbose=2,
+                             validation_split=0.2)
+
+    plot_loss(base_history, "baseline_loss.svg")
 
     preds = model.predict(x_test[:, 1:].astype('float64'))
 
@@ -166,8 +180,10 @@ def LongShortTermMemory(input_csv, output_baseline_csv, output_hypermodel_csv, i
 
     print(model.summary())
 
-    model.fit(x_train[:, 1:].astype('float64'), y_train, epochs=10,
-              validation_data=(x_test[:, 1:].astype('float64'), y_test))
+    hyper_history = model.fit(x_train[:, 1:].astype('float64'), y_train, epochs=10,
+                              validation_data=(x_test[:, 1:].astype('float64'), y_test))
+
+    plot_loss(hyper_history, "hypermodel_loss.svg")
 
     preds = model.predict(x_test[:, 1:].astype('float64'))
 
@@ -181,7 +197,7 @@ def LongShortTermMemory(input_csv, output_baseline_csv, output_hypermodel_csv, i
             "predictions02",
             "predictions03",
             "predictions04",
-            "predictions05",
+            "predictions05",r
             "predictions06",
             "predictions07",
             "predictions08",

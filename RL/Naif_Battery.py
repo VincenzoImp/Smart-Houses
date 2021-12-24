@@ -3,7 +3,8 @@ from libraries import csv, pd, os, datetime, re
 
 class Naif_Battery(object):
 
-    def __init__(self, simulation, id, max_capacity, current_state_of_charge, deficit=0, energy_demand=0, column_info=None,
+    def __init__(self, simulation, id, max_capacity, current_state_of_charge, deficit=0, energy_demand=0,
+                 column_info=None,
                  working_hours="([0-9]|1[0-9]|2[0-3])$"):  # Tini, Tw, Tend devono rispettare i vincoli descritti nell'articolo e dovrebbero matchare con working_hours
         self.simulation = simulation
         self.id = id
@@ -40,7 +41,8 @@ class Naif_Battery(object):
     def update_history(self, E, U, time):
         with open(self.filename, "a") as file_object:
             if re.match(self.working_hours, str(self.simulation.current_hour)):
-                csv.writer(file_object).writerow([self.simulation.timestamp, "on", E, U, time, self.current_state_of_charge])
+                csv.writer(file_object).writerow(
+                    [self.simulation.timestamp, "on", E, U, time, self.current_state_of_charge])
             else:
                 csv.writer(file_object).writerow([self.simulation.timestamp, "off", 0, 0, 0, -1])
         return
@@ -52,7 +54,8 @@ class Naif_Battery(object):
         if re.match(self.working_hours, str(self.simulation.current_hour)):
             current_kwh = 0.0
             state_of_charge = min(self.max_capacity, self.current_state_of_charge + self.deficit)
-            d = {(self.simulation.array_price[index], index): 0.0 for index in range(min(self.hours_available, len(self.simulation.array_price)))}
+            d = {(self.simulation.array_price[index], index): 0.0 for index in
+                 range(min(self.hours_available, len(self.simulation.array_price)))}
             for k in sorted(list(d.keys())):
                 kwh = min(self.energy_demand, self.max_capacity - state_of_charge)
                 d[k] = kwh
@@ -79,7 +82,8 @@ def insert_Naif_Battery(simulation):
         energy_demand = float(row["charge_speed_kw"])
         deficit = float(row["deficit"])
         max_capacity = float(row["battery_capacity_kwh"])
-        new_battery = Naif_Battery(simulation, "Naif_Battery." + str(row_index), max_capacity, 0, deficit, energy_demand,
+        new_battery = Naif_Battery(simulation, "Naif_Battery." + str(row_index), max_capacity, 0, deficit,
+                                   energy_demand,
                                    ("PEV_input_state_of_charge", "PEV_hours_of_charge"))
         simulation.device_list.add(new_battery)
         row_index += 1

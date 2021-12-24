@@ -19,7 +19,8 @@ class NSL_Battery(Non_shiftable_load):
     def update_history(self, E, U, time):
         with open(self.filename, "a") as file_object:
             if re.match(self.working_hours, str(self.simulation.current_hour)):
-                csv.writer(file_object).writerow([self.simulation.timestamp, "on", E, U, time, self.current_state_of_charge])
+                csv.writer(file_object).writerow(
+                    [self.simulation.timestamp, "on", E, U, time, self.current_state_of_charge])
             else:
                 csv.writer(file_object).writerow([self.simulation.timestamp, "off", 0, 0, 0, -1])
         return

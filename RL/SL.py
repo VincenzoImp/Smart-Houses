@@ -38,7 +38,8 @@ class Shiftable_load(object):
         return
 
     def get_reward(self, index, Tw, kwh):
-        value = (1 - self.simulation.home.p) * self.simulation.array_price[index] * kwh + self.simulation.home.p * (self.k * (((Tw + 24) - self.Tini) % 24)) + 0.0000001
+        value = (1 - self.simulation.home.p) * self.simulation.array_price[index] * kwh + self.simulation.home.p * (
+                    self.k * (((Tw + 24) - self.Tini) % 24)) + 0.0000001
         return 1 / value
 
     def get_state(self):
@@ -98,7 +99,8 @@ class Shiftable_load(object):
         E = 0.0
         U = 0.0
         i = 1
-        if re.match(self.working_hours, str(self.simulation.current_hour)):  # caso in cui posso stare nelle righe diverse da -1
+        if re.match(self.working_hours,
+                    str(self.simulation.current_hour)):  # caso in cui posso stare nelle righe diverse da -1
             if not self.simulation.home.one_memory:
                 self.Q = np.zeros((24, self.state_number, 2), dtype=float)
             while i < self.simulation.home.loops:
@@ -126,12 +128,14 @@ class Shiftable_load(object):
                     hours_available = new_hours_available
                     hours_worked = new_hours_worked
                 i += 1
-            bin_action, self.Tw, self.hours_available, self.hours_worked = self.chose_action(self.simulation.current_hour,
-                                                                                             self.get_state(), self.Tw,
-                                                                                             self.hours_available,
-                                                                                             self.hours_worked, True)
+            bin_action, self.Tw, self.hours_available, self.hours_worked = self.chose_action(
+                self.simulation.current_hour,
+                self.get_state(), self.Tw,
+                self.hours_available,
+                self.hours_worked, True)
             E = bin_action * self.energy_demand
-            U = (1 - self.simulation.home.p) * self.simulation.array_price[0] * E + self.simulation.home.p * (self.k * (((self.Tw + 24) - self.Tini) % 24))
+            U = (1 - self.simulation.home.p) * self.simulation.array_price[0] * E + self.simulation.home.p * (
+                        self.k * (((self.Tw + 24) - self.Tini) % 24))
         time = datetime.datetime.now() - time
         self.update_history(E, U, time)
         return E, U
