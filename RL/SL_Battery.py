@@ -109,7 +109,7 @@ class SL_Battery(Shiftable_load):
                 self.hours_worked, True)
             E = min(self.max_capacity - self.current_state_of_charge, bin_action * self.energy_demand)
             U = (1 - self.simulation.home.p) * self.simulation.array_price[0] * E + self.simulation.home.p * (
-                        self.k * (((self.Tw + 24) - self.Tini) % 24))
+                    self.k * (((self.Tw + 24) - self.Tini) % 24))
             self.current_state_of_charge += E
         time = datetime.datetime.now() - time
         self.update_history(E, U, time)

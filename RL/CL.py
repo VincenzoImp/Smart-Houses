@@ -43,7 +43,7 @@ class Controlable_load(object):
 
     def get_reward(self, index, kwh):
         value = (1 - self.simulation.home.p) * self.simulation.array_price[index] * kwh + self.simulation.home.p * (
-                    self.beta * ((kwh - self.max_energy_demand) ** 2)) + 0.0000001
+                self.beta * ((kwh - self.max_energy_demand) ** 2)) + 0.0000001
         return 1 / value
 
     def get_state(self):
@@ -100,7 +100,7 @@ class Controlable_load(object):
             action = self.chose_action(self.simulation.current_hour, self.get_state(), True)
             E = self.action_list[action]
             U = (1 - self.simulation.home.p) * self.simulation.array_price[0] * E + self.simulation.home.p * (
-                        self.beta * ((E - self.max_energy_demand) ** 2))
+                    self.beta * ((E - self.max_energy_demand) ** 2))
         time = datetime.datetime.now() - time
         self.update_history(E, U, time)
         return E, U

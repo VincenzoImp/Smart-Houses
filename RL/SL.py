@@ -39,7 +39,7 @@ class Shiftable_load(object):
 
     def get_reward(self, index, Tw, kwh):
         value = (1 - self.simulation.home.p) * self.simulation.array_price[index] * kwh + self.simulation.home.p * (
-                    self.k * (((Tw + 24) - self.Tini) % 24)) + 0.0000001
+                self.k * (((Tw + 24) - self.Tini) % 24)) + 0.0000001
         return 1 / value
 
     def get_state(self):
@@ -135,7 +135,7 @@ class Shiftable_load(object):
                 self.hours_worked, True)
             E = bin_action * self.energy_demand
             U = (1 - self.simulation.home.p) * self.simulation.array_price[0] * E + self.simulation.home.p * (
-                        self.k * (((self.Tw + 24) - self.Tini) % 24))
+                    self.k * (((self.Tw + 24) - self.Tini) % 24))
         time = datetime.datetime.now() - time
         self.update_history(E, U, time)
         return E, U

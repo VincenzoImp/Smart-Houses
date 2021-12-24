@@ -74,8 +74,6 @@ def plot_loss(history, plot_name):
 
 
 def LongShortTermMemory(input_csv, output_baseline_csv, output_hypermodel_csv, is_test=False):
-    scaler = MinMaxScaler(feature_range=(0, 1))
-
     features = ['energy_price_ahead_' + str(n) for n in range(50, -1, -1)]
     class_labels = ['energy_price_forward_' + str(n) for n in range(1, 13)]
 
@@ -85,6 +83,8 @@ def LongShortTermMemory(input_csv, output_baseline_csv, output_hypermodel_csv, i
 
     x = df[features]
     y = df[class_labels]
+
+    scaler = MinMaxScaler(feature_range=(0, 1))
 
     scaled_x = (pd.DataFrame(df['timestamp']).join(pd.DataFrame(scaler.fit_transform(x)))).to_numpy()
     scaled_y = scaler.fit_transform(y)
@@ -181,7 +181,7 @@ def LongShortTermMemory(input_csv, output_baseline_csv, output_hypermodel_csv, i
     print(model.summary())
 
     hyper_history = model.fit(x_train[:, 1:].astype('float64'), y_train, epochs=10,
-                              validation_data=(x_test[:, 1:].astype('float64'), y_test))
+                              validation_split=0.2)
 
     plot_loss(hyper_history, "hypermodel_loss.svg")
 

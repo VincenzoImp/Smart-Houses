@@ -47,7 +47,7 @@ class CL_Battery(Controlable_load):
 
     def get_reward(self, index, kwh, max_energy_demand):
         value = (1 - self.simulation.home.p) * self.simulation.array_price[index] * kwh + self.simulation.home.p * (
-                    self.beta * ((kwh - max_energy_demand) ** 2)) + 0.0000001
+                self.beta * ((kwh - max_energy_demand) ** 2)) + 0.0000001
         return 1 / value
 
     def chose_action(self, hour, state, state_of_charge, randomless=False):
@@ -137,7 +137,7 @@ class CL_Battery(Controlable_load):
                             self.max_capacity - self.current_state_of_charge)  # a causa di un'assenza di totale liberta' di range, quando la action genera E == 0 allora "rabbocco" E al current_max_energy_demand
             local_max_energy_demand = min(self.max_energy_demand, self.max_capacity - self.current_state_of_charge)
             U = (1 - self.simulation.home.p) * self.simulation.array_price[0] * E + self.simulation.home.p * (
-                        self.beta * ((E - local_max_energy_demand) ** 2))
+                    self.beta * ((E - local_max_energy_demand) ** 2))
             self.current_state_of_charge += E
         time = datetime.datetime.now() - time
         self.update_history(E, U, time)
