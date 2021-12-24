@@ -197,7 +197,7 @@ def LongShortTermMemory(input_csv, output_baseline_csv, output_hypermodel_csv, i
             "predictions02",
             "predictions03",
             "predictions04",
-            "predictions05",r
+            "predictions05",
             "predictions06",
             "predictions07",
             "predictions08",
