@@ -54,7 +54,7 @@ class CL_Battery(Controlable_load):
                 if self.simulation == None and CL_Battery_model.convergence(old_CL_Battery_model):
                     break
             state_key = (1, self.discretize_state_of_charge(self.current_state_of_charge))
-            next_action_list = CL_Battery_model.extract_possible_actions(state_key)
+            next_action_list = CL_Battery_model.extract_possible_actions(state_key, self.current_state_of_charge)
             action = CL_Battery_model.predict_next_action(state_key, next_action_list)
             kwh = self.action_list[action]
             if kwh == 0:

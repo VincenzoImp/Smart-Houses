@@ -50,7 +50,7 @@ class Simulation(object):
             U = 0.0
             try:
                 self.timestamp = self.house_profile_DF.at[self.count_row, "timestamp"]
-                self.array_price = [1 for _ in range(12)] #self.energy_price_DF.at[self.count_row, :]
+                self.array_price = [self.energy_price_DF.at[self.count_row+i, "energy_market_price"] for i in range(12)]
             except:
                 break
             thread_list = []
