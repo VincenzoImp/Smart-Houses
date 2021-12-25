@@ -1,46 +1,42 @@
+from NSL import *
+from NSL_Battery import *
 from CL import *
 from CL_Battery import *
 from DP_Battery import *
-from Home import Home
-from NSL import *
-from NSL_Battery import *
 from Naif_Battery import *
-from SL import *
-from SL_Battery import *
+from Home import Home
 from libraries import threading, os, csv, datetime, pd
 
 
 class Simulation(object):
 
-    def __init__(self, home: Home, loops, one_memory, current_day=0, current_hour=0):
-        # simulation datas
+    def __init__(self, home: Home, path_results, loops, current_day=0, current_hour=0):
+        #simulation datas
         self.home = home
+        self.path_results = path_results
         self.directory = ""
         self.device_list = set()
         self.current_day = current_day
         self.current_hour = current_hour
-        self.count_row = current_day * 24 + current_hour
+        self.count_row = current_day*24 + current_hour
         self.array_price = []
         self.timestamp = ""
         self.loops = loops
-        self.one_memory = one_memory
         self.house_profile_DF = None
         self.energy_price_DF = None
         return
 
     def insert_devices(self):
-        insert_NSL(self)
-        insert_NSL_Battery(self)
-        insert_SL(self)
-        insert_SL_Battery(self)
-        insert_CL(self)
+        #insert_NSL(self)
+        #insert_NSL_Battery(self)
+        #insert_CL(self)
         insert_CL_Battery(self)
-        insert_DP_Battery(self)
-        insert_Naif_Battery(self)
+        #insert_DP_Battery(self)
+        #insert_Naif_Battery(self)
         return
 
     def run(self):
-        self.directory = datetime.datetime.now().strftime("%Y-%m-%d-%H_%M_%S")
+        self.directory = os.path.join(self.path_results, datetime.datetime.now().strftime("%Y-%m-%d-%H_%M_%S"))
         os.mkdir(self.directory)
         self.insert_devices()
         self.house_profile_DF = pd.read_csv(os.path.join(self.home.path_dir_home, "new_profiles.csv"))
@@ -54,7 +50,7 @@ class Simulation(object):
             U = 0.0
             try:
                 self.timestamp = self.house_profile_DF.at[self.count_row, "timestamp"]
-                self.array_price = [1 for _ in range(12)]  # self.energy_price_DF.at[self.count_row, :]
+                self.array_price = [1 for _ in range(12)] #self.energy_price_DF.at[self.count_row, :]
             except:
                 break
             thread_list = []
@@ -89,8 +85,7 @@ class Simulation(object):
             file_object.write(
                 "epsilon: {} (epsilon é la probabilitá di scegliere un azione random. (1-epsilon) é la probabilitá di scegliere l'azione migliore)\n".format(
                     self.home.epsilon))
-            file_object.write("one_memory: {}\n".format(self.home.one_memory))
-            file_object.write("loops: {}\n".format(self.home.loops))
+            file_object.write("loops: {}\n".format(self.loops))
         return
 
 
