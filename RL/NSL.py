@@ -19,7 +19,7 @@ class Non_shiftable_load(Device):
                 self.energy_demand = tmp
         return
 
-    def function(self):
+    def function(self, dict_results):
         time = datetime.datetime.now()
         E = 0.0
         U = 0.0
@@ -28,7 +28,8 @@ class Non_shiftable_load(Device):
             U = (1 - self.simulation.home.p) * self.simulation.array_price[0] * E
         time = datetime.datetime.now() - time
         self.update_history(E, U, time)
-        return E, U
+        dict_results[self.id] = (E, U)
+        return
 
 
 def insert_NSL(simulation):

@@ -14,9 +14,8 @@ class CL_Battery_GeedyQLearning(CL_GeedyQLearning):
 
     def observe_reward_value(self, state_key, action_key):
         kwh = self.device.action_list[action_key]
-        if kwh == 0:
-            if self.tmp_state_of_charge + self.device.action_list[action_key + 1] > self.device.max_capacity:  # niente index out of range per costruzione
-                kwh = min(self.device.max_energy_demand, self.device.max_capacity - self.tmp_state_of_charge)  # a causa di un'assenza di totale liberta' di range, quando la action genera E == 0 allora "rabbocco" E al current_max_energy_demand
+        if kwh == 0 and self.tmp_state_of_charge + self.device.action_list[action_key + 1] > self.device.max_capacity:  # niente index out of range per costruzione
+            kwh = min(self.device.max_energy_demand, self.device.max_capacity - self.tmp_state_of_charge)  # a causa di un'assenza di totale liberta' di range, quando la action genera E == 0 allora "rabbocco" E al current_max_energy_demand
         local_max_energy_demand = min(self.device.max_energy_demand, self.device.max_capacity - self.tmp_state_of_charge)
         value = (1 - self.device.simulation.home.p) * self.device.simulation.array_price[state_key[0]-1] * kwh + self.device.simulation.home.p * (self.device.beta * ((kwh - local_max_energy_demand) ** 2))
         if value == 0:
@@ -25,9 +24,8 @@ class CL_Battery_GeedyQLearning(CL_GeedyQLearning):
     
     def update_state(self, state_key, action_key):
         kwh = self.device.action_list[action_key]
-        if kwh == 0:
-            if self.tmp_state_of_charge + self.device.action_list[action_key + 1] > self.device.max_capacity:  # niente index out of range per costruzione
-                kwh = min(self.device.max_energy_demand, self.device.max_capacity - self.tmp_state_of_charge)  # a causa di un'assenza di totale liberta' di range, quando la action genera E == 0 allora "rabbocco" E al current_max_energy_demand
+        if kwh == 0 and self.tmp_state_of_charge + self.device.action_list[action_key + 1] > self.device.max_capacity:  # niente index out of range per costruzione
+            kwh = min(self.device.max_energy_demand, self.device.max_capacity - self.tmp_state_of_charge)  # a causa di un'assenza di totale liberta' di range, quando la action genera E == 0 allora "rabbocco" E al current_max_energy_demand
         return (state_key[0]+1, self.device.discretize_state_of_charge(self.tmp_state_of_charge + kwh)), self.tmp_state_of_charge + kwh
 
     def check_the_end_flag(self, state_key):

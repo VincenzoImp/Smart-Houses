@@ -36,7 +36,7 @@ class NSL_Battery(Non_shiftable_load):
                 self.current_state_of_charge = tmp
         return
 
-    def function(self):
+    def function(self, dict_results):
         time = datetime.datetime.now()
         E = 0.0
         U = 0.0
@@ -46,7 +46,8 @@ class NSL_Battery(Non_shiftable_load):
             self.current_state_of_charge += E
         time = datetime.datetime.now() - time
         self.update_history(E, U, time)
-        return E, U
+        dict_results[self.id] = (E, U)
+        return
 
 
 def insert_NSL_Battery(simulation):

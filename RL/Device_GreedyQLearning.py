@@ -35,9 +35,30 @@ class Device_GreedyQLearning(GreedyQLearning):
         raise NotImplementedError("This method must be implemented.")
 
     def normalize_q_value(self):
-        self.q_df.q_value = self.q_df.q_value / self.q_df.q_value.sum()
+        '''
+        Normalize q-value.
+        
+        Override.
+        
+        This method is called in each learning steps.
+        
+        For example:
+            self.q_df.q_value = self.q_df.q_value / self.q_df.q_value.sum()
+        '''
+        if self.q_df is not None and self.q_df.shape[0]:
+            # min-max normalization
+            self.q_df.q_value = (self.q_df.q_value - self.q_df.q_value.min()) / (self.q_df.q_value.max() - self.q_df.q_value.min())
+        return
 
     def normalize_r_value(self):
-        self.r_df.r_value = self.r_df.r_value / self.r_df.r_value.sum()
-
-    
+        '''
+        Normalize r-value.
+        Override.
+        This method is called in each learning steps.
+        For example:
+            self.r_df = self.r_df.r_value / self.r_df.r_value.sum()
+        '''
+        if self.r_df is not None and self.r_df.shape[0]:
+            # z-score normalization.
+            self.r_df.r_value = (self.r_df.r_value - self.r_df.r_value.mean()) / self.r_df.r_value.std()
+        return

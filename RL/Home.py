@@ -1,8 +1,9 @@
 
 class Home(object):
 
-    def __init__(self, path_dir_home, path_energy_price, p=0.5, teta=0.1, gamma=0.95, epsilon=0.2):
+    def __init__(self, id, path_dir_home, path_energy_price, p=0.5, teta=0.1, gamma=0.95, epsilon=0.2):
         #home datas
+        self.id = id
         self.path_dir_home = path_dir_home
         self.path_energy_price = path_energy_price
         self.p = p  # (1-p) é la prioritá di ottimizzare i consumi, e p é la prioritá di ottimizzare i disservizi #[0.3, 0.5, 0.8]

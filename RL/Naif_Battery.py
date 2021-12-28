@@ -4,7 +4,7 @@ from libraries import csv, pd, os, datetime
 class Naif_Battery(Device):
 
     def __init__(self, simulation, id, max_capacity, current_state_of_charge, deficit=0, energy_demand=0, column_info=None, is_active=False):  # Tini, Tw, Tend devono rispettare i vincoli descritti nell'articolo e dovrebbero matchare con is_active
-        super.__init__(simulation, id, column_info, is_active)
+        super().__init__(simulation, id, column_info, is_active)
         self.max_capacity = max_capacity
         self.current_state_of_charge = current_state_of_charge
         self.deficit = deficit
@@ -39,7 +39,7 @@ class Naif_Battery(Device):
                 self.current_state_of_charge = new_state_of_charge
         return
 
-    def function(self):
+    def function(self, dict_results):
         time = datetime.datetime.now()
         E = 0.0
         U = 0.0
@@ -59,7 +59,8 @@ class Naif_Battery(Device):
             self.hours_available -= 1
         time = datetime.datetime.now() - time
         self.update_history(E, U, time)
-        return E, U
+        dict_results[self.id] = (E, U)
+        return
 
 
 def insert_Naif_Battery(simulation):

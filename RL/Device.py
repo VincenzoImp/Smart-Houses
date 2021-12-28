@@ -29,5 +29,5 @@ class Device(metaclass=ABCMeta):
         raise NotImplementedError("This method must be implemented.")
 
     @abstractmethod
-    def function(self):
+    def function(self, dict_results):
         raise NotImplementedError("This method must be implemented.")

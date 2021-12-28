@@ -1,5 +1,5 @@
 from CL_GreedyQLearning import CL_GeedyQLearning
-from libraries import np, datetime
+from libraries import np, datetime, csv
 from Device import Device
 
 class Controlable_load(Device):
@@ -18,7 +18,7 @@ class Controlable_load(Device):
         #TO DO
         return
 
-    def function(self):
+    def function(self, dict_results):
         #TO DO
         return
 
