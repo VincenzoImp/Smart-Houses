@@ -101,7 +101,7 @@ class DP_Battery(CL_Battery):
 
         time = datetime.datetime.now() - time
         self.update_history(E, U, time)
-        dict_results[self.id] = (E, U)
+        dict_results[self.id] = {'E':E, 'U':U, 'SOC':self.current_state_of_charge}
         return
 
     def state_to_charge(self, state): 

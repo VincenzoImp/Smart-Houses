@@ -46,7 +46,7 @@ class NSL_Battery(Non_shiftable_load):
             self.current_state_of_charge += E
         time = datetime.datetime.now() - time
         self.update_history(E, U, time)
-        dict_results[self.id] = (E, U)
+        dict_results[self.id] = {'E':E, 'U':U, 'SOC':self.current_state_of_charge}
         return
 
 

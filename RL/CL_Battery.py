@@ -68,7 +68,7 @@ class CL_Battery(Controlable_load):
             U = (1 - self.simulation.home.p) * self.simulation.array_price[0] * E + self.simulation.home.p * (self.beta * ((E - local_max_energy_demand) ** 2))
         time = datetime.datetime.now() - time
         self.update_history(E, U, time)
-        dict_results[self.id] = (E, U)
+        dict_results[self.id] = {'E':E, 'U':U, 'SOC':self.current_state_of_charge}
         return
 
     def discretize_state_of_charge(self, state_of_charge):

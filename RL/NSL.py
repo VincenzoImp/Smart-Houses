@@ -28,7 +28,7 @@ class Non_shiftable_load(Device):
             U = (1 - self.simulation.home.p) * self.simulation.array_price[0] * E
         time = datetime.datetime.now() - time
         self.update_history(E, U, time)
-        dict_results[self.id] = (E, U)
+        dict_results[self.id] = {'E':E, 'U':U}
         return
 
 

@@ -27,7 +27,7 @@ class Simulation(object):
         #insert_NSL(self)
         insert_NSL_Battery(self)
         #insert_CL(self)
-        insert_CL_Battery(self)
+        #insert_CL_Battery(self)
         #insert_DP_Battery(self)
         insert_Naif_Battery(self)
         return
@@ -64,8 +64,10 @@ class Simulation(object):
             for thread in thread_list:
                 thread.join()
             for device in self.device_list:
-                E += dict_results[device.id][0]
-                U += dict_results[device.id][1]
+                E += dict_results[device.id]['E']
+                U += dict_results[device.id]['U']
+                if 'SOC' in dict_results[device.id].keys():
+                    device.current_state_of_charge = dict_results[device.id]['SOC']
             time = datetime.datetime.now() - time
             with open(main_filename, "a") as file_object:
                 csv.writer(file_object).writerow([self.timestamp, E, U, time])
