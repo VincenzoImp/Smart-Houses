@@ -20,7 +20,7 @@ def hypermodel_builder(hp):
     model = Sequential()
     model.add(LSTM(units=hp.Int('units', min_value=32, max_value=512, step=32),
                    return_sequences=True,
-                   input_shape=(51, 1)))
+                   input_shape=(50, 1)))
 
     model.add(Dropout(hp.Float('Dropout_rate', min_value=0, max_value=0.5, step=0.1)))
 
@@ -74,7 +74,7 @@ def plot_loss(history, plot_name):
 
 
 def LongShortTermMemory(input_csv, output_baseline_csv, output_hypermodel_csv, is_test=False):
-    features = ['energy_price_ahead_' + str(n) for n in range(50, -1, -1)]
+    features = ['energy_price_ahead_' + str(n) for n in range(50, 0, -1)]
     class_labels = ['energy_price_forward_' + str(n) for n in range(1, 13)]
 
     df = pd.read_csv(input_csv)
@@ -98,7 +98,7 @@ def LongShortTermMemory(input_csv, output_baseline_csv, output_hypermodel_csv, i
 
     # baseline model
     model = Sequential()
-    model.add(LSTM(units=50, return_sequences=True, input_shape=(51, 1)))
+    model.add(LSTM(units=50, return_sequences=True, input_shape=(50, 1)))
     model.add(Dropout(0.5))
     model.add(LSTM(units=50))
     model.add(Dropout(0.5))

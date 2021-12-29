@@ -2,11 +2,14 @@ import csv
 import os
 from itertools import islice
 
+import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt
 from sklearn.impute import KNNImputer
-
-
 # preprocess dataset removing nan values
+from sklearn.preprocessing import MinMaxScaler
+
+
 def k_nearest_neighborhood(data):
     # compute k-nearest neighbour
     df = pd.read_csv(data)
@@ -168,6 +171,29 @@ def update_new(new_profiles_file):
     return
 
 
+def plot_prices_and_consumptions(prices_and_consumptions_file):
+    df = pd.read_csv(prices_and_consumptions_file)
+
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    consumptions = np.reshape(np.array(df['consumption_kwh'][:168]), (-1, 1))
+    consumptions = scaler.fit_transform(consumptions)
+
+    energy_price = np.reshape(np.array(df['energy_market_price'][:168]), (-1, 1))
+    energy_price = scaler.fit_transform(energy_price)
+
+    fig, ax = plt.subplots()
+    ax.plot(df['timestamp'][:168], energy_price, label="energy price")
+    ax.plot(df['timestamp'][:168], consumptions, label="consumptions")
+
+    ax.set_xticks(df['timestamp'][:168:10])
+
+    plt.setp(ax.get_xticklabels(), rotation=90, horizontalalignment='right')
+
+    fig.tight_layout()
+    plt.legend()
+    fig.savefig("datas/plot/prices_and_consumptions.svg", dpi=1200)
+
+
 def prepare_NN_data(energy, nn_datas):
     energy_market_price = []
 
@@ -175,13 +201,14 @@ def prepare_NN_data(energy, nn_datas):
         reader = csv.reader(energy_60_file)
         writer = csv.writer(nn_datas_file)
         headers = ['timestamp']
-        headers.extend(['energy_price_ahead_' + str(n) for n in range(50, -1, -1)])
+        headers.extend(['energy_price_ahead_' + str(n) for n in range(50, 0, -1)])
         headers.extend(['energy_price_forward_' + str(n) for n in range(1, 13)])
         writer.writerow(headers)
-
+        timestamp = []
         for index, row in islice(enumerate(reader), 1, None):
             energy_market_price.append(row[1])
-            if index > 62:
-                new_line = [row[0]]
-                new_line.extend(energy_market_price[index - 63: index])
+            timestamp.append(row[0])
+            if index >= 62:
+                new_line = [timestamp[index - 50]]
+                new_line.extend(energy_market_price[index - 62: index])
                 writer.writerow(new_line)
