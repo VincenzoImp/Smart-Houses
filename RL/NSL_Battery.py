@@ -4,7 +4,8 @@ from libraries import pd, csv, datetime, os
 
 class NSL_Battery(Non_shiftable_load):
 
-    def __init__(self, simulation, id, max_capacity, current_state_of_charge=0, energy_demand=0, column_info=None, is_active=False):
+    def __init__(self, simulation, id, max_capacity, current_state_of_charge=0, energy_demand=0, column_info=None,
+                 is_active=False):
         super().__init__(simulation, id, energy_demand, column_info, is_active)
         self.max_capacity = max_capacity
         self.current_state_of_charge = current_state_of_charge
@@ -18,7 +19,8 @@ class NSL_Battery(Non_shiftable_load):
     def update_history(self, E, U, time):
         with open(self.filename, "a") as file_object:
             if self.is_active:
-                csv.writer(file_object).writerow([self.simulation.timestamp, "on", E, U, time, self.current_state_of_charge])
+                csv.writer(file_object).writerow(
+                    [self.simulation.timestamp, "on", E, U, time, self.current_state_of_charge])
             else:
                 csv.writer(file_object).writerow([self.simulation.timestamp, "off", 0, 0, 0, -1])
         return
@@ -46,7 +48,7 @@ class NSL_Battery(Non_shiftable_load):
             self.current_state_of_charge += E
         time = datetime.datetime.now() - time
         self.update_history(E, U, time)
-        dict_results[self.id] = {'E':E, 'U':U, 'SOC':self.current_state_of_charge}
+        dict_results[self.id] = {'E': E, 'U': U, 'SOC': self.current_state_of_charge}
         return
 
 
@@ -60,7 +62,8 @@ def insert_NSL_Battery(simulation):
             break
         max_capacity = float(row["battery_capacity_kwh"])
         energy_demand = float(row["charge_speed_kw"])
-        new_NSL_Battery = NSL_Battery(simulation, "NSL_Battery." + str(row_index), max_capacity, 0, energy_demand, "PEV_input_state_of_charge")
+        new_NSL_Battery = NSL_Battery(simulation, "NSL_Battery." + str(row_index), max_capacity, 0, energy_demand,
+                                      "PEV_input_state_of_charge")
         simulation.device_list.add(new_NSL_Battery)
         row_index += 1
     return

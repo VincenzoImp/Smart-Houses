@@ -1,5 +1,6 @@
 from libraries import os, csv, ABCMeta, abstractmethod
 
+
 class Device(metaclass=ABCMeta):
 
     def __init__(self, simulation, id, column_info=None, is_active=False):

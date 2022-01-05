@@ -1,12 +1,10 @@
-from copy import deepcopy
 from CL_Battery import CL_Battery
 from libraries import pd, os, datetime, copy
 
 
 class DP_Battery(CL_Battery):
-
     class Info(object):
-    
+
         def __init__(self, value=0.0, first_action=-1):
             self.setter(value, first_action)
             return
@@ -15,14 +13,17 @@ class DP_Battery(CL_Battery):
             self.value = info_obj.value
             self.first_action = info_obj.first_action
             return
-        
+
         def setter(self, value, first_action):
             self.value = value
             self.first_action = first_action
             return
 
-    def __init__(self, simulation, id, beta, current_state_of_charge, max_capacity, min_energy_demand, max_energy_demand,action_number, state_number, column_info=None,is_active=False):  # si assume che action_number >=2
-        super(). __init__(simulation, id, beta, min_energy_demand, max_energy_demand, state_number, action_number, max_capacity, current_state_of_charge, column_info, is_active)
+    def __init__(self, simulation, id, beta, current_state_of_charge, max_capacity, min_energy_demand,
+                 max_energy_demand, action_number, state_number, column_info=None,
+                 is_active=False):  # si assume che action_number >=2
+        super().__init__(simulation, id, beta, min_energy_demand, max_energy_demand, state_number, action_number,
+                         max_capacity, current_state_of_charge, column_info, is_active)
         self.hours_of_charge = 0
         return
 
@@ -63,7 +64,7 @@ class DP_Battery(CL_Battery):
 
             tmp_info = self.Info()
             for hour in range(1, len_y):
-                
+
                 for state in range(1, len_x):
                     state_of_charge = self.state_to_charge(state)
                     min_index, max_index = self.get_min_max_index_action(state_of_charge)
@@ -73,11 +74,13 @@ class DP_Battery(CL_Battery):
                     for action in range(min_index, max_index + 1):
                         kwh = self.action_list[action]
                         if kwh == 0:
-                            if state_of_charge + self.action_list[action + 1] > self.max_capacity:  # niente index out of range per costruzione
+                            if state_of_charge + self.action_list[
+                                action + 1] > self.max_capacity:  # niente index out of range per costruzione
                                 kwh = local_max_energy_demand  # a causa di un'assenza di totale liberta' di range, quando la action genera kwh == 0 allora "rabbocco" kwh al current_max_energy_demand
-                        tmp_info = copy.deepcopy(Q[hour - 1][self.discretize_state_of_charge(self.max_capacity - self.current_state_of_charge - (state_of_charge + kwh))])
+                        tmp_info = copy.deepcopy(Q[hour - 1][self.discretize_state_of_charge(
+                            self.max_capacity - self.current_state_of_charge - (state_of_charge + kwh))])
                         tmp_info.value += self.get_reward(hour - 1, kwh, local_max_energy_demand)
-                        
+
                         if tmp_info.value > Q[hour][state].value:
                             Q[hour][state].clone(tmp_info)
                             best_action = action
@@ -85,8 +88,8 @@ class DP_Battery(CL_Battery):
                     if Q[hour][state].first_action == -1:
                         Q[hour][state].first_action = [best_action]
                     else:
-                        Q[hour][state].first_action.append(best_action)   
-            
+                        Q[hour][state].first_action.append(best_action)
+
             if len_x != 1:
                 action = Q[len_y - 1][len_x - 1].first_action[0]
             else:
@@ -94,27 +97,31 @@ class DP_Battery(CL_Battery):
             E = self.action_list[action]
             local_max_energy_demand = min(self.max_energy_demand, self.max_capacity - self.current_state_of_charge)
             if E == 0:
-                if self.current_state_of_charge + self.action_list[action + 1] > self.max_capacity:  # niente index out of range per costruzione
+                if self.current_state_of_charge + self.action_list[
+                    action + 1] > self.max_capacity:  # niente index out of range per costruzione
                     E = local_max_energy_demand  # a causa di un'assenza di totale liberta' di range, quando la action genera kwh == 0 allora "rabbocco" kwh al current_max_energy_demand
-            U = (1 - self.simulation.home.p) * self.simulation.array_price[0] * E + self.simulation.home.p * (self.beta * ((E - local_max_energy_demand) ** 2))
+            U = (1 - self.simulation.home.p) * self.simulation.array_price[0] * E + self.simulation.home.p * (
+                    self.beta * ((E - local_max_energy_demand) ** 2))
             self.current_state_of_charge += E
 
         time = datetime.datetime.now() - time
         self.update_history(E, U, time)
-        dict_results[self.id] = {'E':E, 'U':U, 'SOC':self.current_state_of_charge}
+        dict_results[self.id] = {'E': E, 'U': U, 'SOC': self.current_state_of_charge}
         return
 
-    def state_to_charge(self, state): 
+    def state_to_charge(self, state):
         # l'output e' da leggere nel modo seguente: 
         # es (self.max_capacity / (self.state_number - 1)) = 0.5, state = 2
         # considero le casistiche dove 0.5 < charge <= 1.0
         return state * (self.max_capacity / (self.state_number - 1))
 
     def get_reward(self, index, kwh, max_energy_demand):
-        value = (1 - self.simulation.home.p) * self.simulation.array_price[index] * kwh + self.simulation.home.p * (self.beta * ((kwh - max_energy_demand) ** 2))
+        value = (1 - self.simulation.home.p) * self.simulation.array_price[index] * kwh + self.simulation.home.p * (
+                self.beta * ((kwh - max_energy_demand) ** 2))
         if value == 0:
             return 1
         return 1 / value
+
 
 def insert_DP_Battery(simulation):
     battery_DF = pd.read_csv(os.path.join(simulation.home.path_dir_home, "DPpev.csv"))
@@ -130,7 +137,9 @@ def insert_DP_Battery(simulation):
         state_number = int(row["state_number"])
         beta = float(row["beta"])
         max_capacity = float(row["battery_capacity_kwh"])
-        new_battery = DP_Battery(simulation, "DP_Battery." + str(row_index), beta, 0, max_capacity, min_energy_demand,max_energy_demand, action_number, state_number,("PEV_input_state_of_charge", "PEV_hours_of_charge"))
+        new_battery = DP_Battery(simulation, "DP_Battery." + str(row_index), beta, 0, max_capacity, min_energy_demand,
+                                 max_energy_demand, action_number, state_number,
+                                 ("PEV_input_state_of_charge", "PEV_hours_of_charge"))
         simulation.device_list.add(new_battery)
         row_index += 1
     return

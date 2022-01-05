@@ -5,8 +5,10 @@ from libraries import pd, csv, datetime, os, copy
 
 class CL_Battery(Controlable_load):
 
-    def __init__(self, simulation, id, beta, min_energy_demand, max_energy_demand, state_number, action_number, max_capacity, current_state_of_charge=0, column_info=None, is_active=False):
-        super().__init__(simulation, id, beta, min_energy_demand, max_energy_demand, state_number, action_number, column_info, is_active)
+    def __init__(self, simulation, id, beta, min_energy_demand, max_energy_demand, state_number, action_number,
+                 max_capacity, current_state_of_charge=0, column_info=None, is_active=False):
+        super().__init__(simulation, id, beta, min_energy_demand, max_energy_demand, state_number, action_number,
+                         column_info, is_active)
         self.max_capacity = max_capacity
         self.current_state_of_charge = current_state_of_charge
         return
@@ -19,14 +21,16 @@ class CL_Battery(Controlable_load):
     def update_history(self, E, U, time):
         with open(self.filename, "a") as file_object:
             if self.is_active:
-                csv.writer(file_object).writerow([self.simulation.timestamp, "on", E, U, time, self.current_state_of_charge])
+                csv.writer(file_object).writerow(
+                    [self.simulation.timestamp, "on", E, U, time, self.current_state_of_charge])
             else:
                 csv.writer(file_object).writerow([self.simulation.timestamp, "off", 0, 0, 0, -1])
         return
 
     def update_data(self):
         if self.column_info != None:
-            new_current_state_of_charge = self.simulation.house_profile_DF.at[self.simulation.count_row, self.column_info]
+            new_current_state_of_charge = self.simulation.house_profile_DF.at[
+                self.simulation.count_row, self.column_info]
             if new_current_state_of_charge == -1:
                 self.is_active = False
                 self.current_state_of_charge = -1
@@ -61,14 +65,17 @@ class CL_Battery(Controlable_load):
                 action = CL_Battery_model.predict_next_action(state_key, next_action_list)
             kwh = self.action_list[action]
             local_max_energy_demand = min(self.max_energy_demand, self.max_capacity - self.current_state_of_charge)
-            if kwh == 0 and self.current_state_of_charge + self.action_list[action + 1] > self.max_capacity:  # niente index out of range per costruzione
-                kwh = min(self.max_energy_demand, self.max_capacity - self.current_state_of_charge)  # a causa di un'assenza di totale liberta' di range, quando la action genera E == 0 allora "rabbocco" E al current_max_energy_demand
+            if kwh == 0 and self.current_state_of_charge + self.action_list[
+                action + 1] > self.max_capacity:  # niente index out of range per costruzione
+                kwh = min(self.max_energy_demand,
+                          self.max_capacity - self.current_state_of_charge)  # a causa di un'assenza di totale liberta' di range, quando la action genera E == 0 allora "rabbocco" E al current_max_energy_demand
             self.current_state_of_charge += kwh
             E = kwh
-            U = (1 - self.simulation.home.p) * self.simulation.array_price[0] * E + self.simulation.home.p * (self.beta * ((E - local_max_energy_demand) ** 2))
+            U = (1 - self.simulation.home.p) * self.simulation.array_price[0] * E + self.simulation.home.p * (
+                    self.beta * ((E - local_max_energy_demand) ** 2))
         time = datetime.datetime.now() - time
         self.update_history(E, U, time)
-        dict_results[self.id] = {'E':E, 'U':U, 'SOC':self.current_state_of_charge}
+        dict_results[self.id] = {'E': E, 'U': U, 'SOC': self.current_state_of_charge}
         return
 
     def discretize_state_of_charge(self, state_of_charge):

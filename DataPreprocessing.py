@@ -194,7 +194,7 @@ def plot_prices_and_consumptions(prices_and_consumptions_file):
     fig.savefig("datas/plot/prices_and_consumptions.svg", dpi=1200)
 
 
-def prepare_NN_data(energy, nn_datas):
+def create_dataset(energy, nn_datas):
     energy_market_price = []
 
     with open(energy, "r") as energy_60_file, open(nn_datas, "w") as nn_datas_file:

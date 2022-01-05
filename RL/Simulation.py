@@ -1,16 +1,13 @@
-from NSL import *
-from NSL_Battery import *
-from CL import *
-from CL_Battery import *
-from DP_Battery import *
-from Naif_Battery import *
 from Home import Home
+from NSL_Battery import *
+from Naif_Battery import *
 from libraries import os, csv, datetime, pd, multiprocessing
+
 
 class Simulation(object):
 
     def __init__(self, home: Home, path_results, loops):
-        #simulation datas
+        # simulation datas
         self.home = home
         self.path_results = path_results
         self.directory = ""
@@ -24,23 +21,26 @@ class Simulation(object):
         return
 
     def insert_devices(self):
-        #insert_NSL(self)
+        # insert_NSL(self)
         insert_NSL_Battery(self)
-        #insert_CL(self)
-        #insert_CL_Battery(self)
-        #insert_DP_Battery(self)
+        # insert_CL(self)
+        # insert_CL_Battery(self)
+        # insert_DP_Battery(self)
         insert_Naif_Battery(self)
         return
 
     def run(self):
-        self.directory = os.path.join(self.path_results, self.home.id + "_" + datetime.datetime.now().strftime("%Y-%m-%d-%H_%M_%S"))
+        self.directory = os.path.join(self.path_results,
+                                      self.home.id + "_" + datetime.datetime.now().strftime("%Y-%m-%d-%H_%M_%S"))
         os.mkdir(self.directory)
         self.insert_devices()
         self.house_profile_DF = pd.read_csv(os.path.join(self.home.path_dir_home, "new_profiles.csv"))
         self.energy_price_DF = pd.read_csv(self.home.path_energy_price)
-        start_index = self.house_profile_DF.index[self.house_profile_DF["timestamp"] == self.energy_price_DF.iloc[0]["timestamp"]].tolist()[0]
-        end_index = self.house_profile_DF.index[self.house_profile_DF["timestamp"] == self.energy_price_DF.iloc[-1]["timestamp"]].tolist()[0]
-        self.house_profile_DF = self.house_profile_DF[start_index : end_index+1]
+        start_index = self.house_profile_DF.index[
+            self.house_profile_DF["timestamp"] == self.energy_price_DF.iloc[0]["timestamp"]].tolist()[0]
+        end_index = self.house_profile_DF.index[
+            self.house_profile_DF["timestamp"] == self.energy_price_DF.iloc[-1]["timestamp"]].tolist()[0]
+        self.house_profile_DF = self.house_profile_DF[start_index: end_index + 1]
         self.house_profile_DF.reset_index(drop=True, inplace=True)
         main_filename = os.path.join(self.directory, "main.csv")
         with open(main_filename, "w") as file_object:
