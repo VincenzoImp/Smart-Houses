@@ -90,10 +90,10 @@ def run_hypermodel(output_hypermodel_csv, scaler, x_test, x_train, y_test, y_tra
     # Instantiate the tuner
     tuner = kt.Hyperband(hypermodel_builder,  # the hypermodel
                          kt.Objective("root_mean_squared_error", direction="min"),  # objective to optimize
-                         max_epochs=20,
+                         max_epochs=30,
                          factor=3,
                          directory='output',  # directory to save logs
-                         project_name='LSTM 2.0')
+                         project_name='LSTM 3.0')
 
     # tuner.search_space_summary()
 
@@ -112,8 +112,8 @@ def run_hypermodel(output_hypermodel_csv, scaler, x_test, x_train, y_test, y_tra
     model = tuner.get_best_models(num_models=1)[0]
     print(model.summary())
 
-    hyper_history = model.fit(x_train[:, 1:].astype('float64'), y_train, epochs=20,
-                              batch_size=32, validation_split=0.2)
+    hyper_history = model.fit(x_train[:, 1:].astype('float64'), y_train, epochs=best_hyperparameters.values["tuner/epochs"],
+                              batch_size=64, validation_split=0.2)
 
     plot_loss(hyper_history, "hypermodel_loss.svg")
 
@@ -179,7 +179,7 @@ def run_base_model(output_baseline_csv, scaler, x_test, x_train, y_test, y_train
     callback = EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True)
 
     # fit the model with a validation dataset
-    base_history = model.fit(x_train[:, 1:].astype('float64'), y_train, epochs=20, batch_size=32, verbose=2,
+    base_history = model.fit(x_train[:, 1:].astype('float64'), y_train, epochs=30, batch_size=64, verbose=2,
                              validation_split=0.2, callbacks=[callback])
 
     # save the plot of the loss during epochs
