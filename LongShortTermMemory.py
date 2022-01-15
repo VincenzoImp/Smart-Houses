@@ -17,16 +17,16 @@ from tensorflow.python.keras.layers import Dropout
 
 def hypermodel_builder(hp):
     model = Sequential()
-    model.add(LSTM(units=hp.Int('units', min_value=32, max_value=512, step=32),
+    model.add(LSTM(units=hp.Int('units_first_layer', min_value=32, max_value=512, step=32),
                    return_sequences=True,
                    input_shape=(50, 1)))
 
-    model.add(Dropout(hp.Float('Dropout_rate', min_value=0.1, max_value=0.5, step=0.1)))
+    model.add(Dropout(hp.Float('Dropout_rate_first_layer', min_value=0.1, max_value=0.5, step=0.1)))
 
-    for i in range(hp.Int('n_layers', 1, 4)):
-        model.add(LSTM(units=hp.Int('units', min_value=32, max_value=512, step=32), return_sequences=True))
-        for j in range(hp.Int('n_layers', 0, 1)):
-            model.add(Dropout(hp.Float('Dropout_rate', min_value=0.1, max_value=0.5, step=0.1)))
+    for i in range(hp.Int('n_additional_layers', 1, 4)):
+        model.add(LSTM(units=hp.Int('units_add_layer', min_value=32, max_value=512, step=32), return_sequences=True))
+        for j in range(hp.Int('n_additional_dropout_layers', 0, 1)):
+            model.add(Dropout(hp.Float('Dropout_rate_add_layer', min_value=0.1, max_value=0.5, step=0.1)))
 
     model.add(Flatten())
 
@@ -112,7 +112,8 @@ def run_hypermodel(output_hypermodel_csv, scaler, x_test, x_train, y_test, y_tra
     model = tuner.get_best_models(num_models=1)[0]
     print(model.summary())
 
-    hyper_history = model.fit(x_train[:, 1:].astype('float64'), y_train, epochs=best_hyperparameters.values["tuner/epochs"],
+    hyper_history = model.fit(x_train[:, 1:].astype('float64'), y_train,
+                              epochs=best_hyperparameters.values["tuner/epochs"],
                               batch_size=64, validation_split=0.2)
 
     plot_loss(hyper_history, "hypermodel_loss.svg")
