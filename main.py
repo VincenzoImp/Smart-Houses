@@ -14,17 +14,17 @@ if __name__ == '__main__':
     NN_baseline_result_file = './datas/NN_baseline_results.csv'
     NN_hypermodel_result_file = './datas/NN_hypermodel_results.csv'
 
-    print('Process Energy 60')
-    k_nearest_neighborhood(energy_price_file)
-    format_correctly(energy_price_file)
-
-    print('get_new_profiles')
-    for_each_home(folder, energy_price_file, profiles_file, new_profiles_file)
-
-    plot_prices_and_consumptions(prices_and_consumptions_file)
-
-    print('get_NN_datas')
-    create_dataset(energy_price_file, NN_datas_file)
+    # print('Process Energy 60')
+    # k_nearest_neighborhood(energy_price_file)
+    # format_correctly(energy_price_file)
+    #
+    # print('get_new_profiles')
+    # for_each_home(folder, energy_price_file, profiles_file, new_profiles_file)
+    #
+    # plot_prices_and_consumptions(prices_and_consumptions_file)
+    #
+    # print('get_NN_datas')
+    # create_dataset(energy_price_file, NN_datas_file)
 
     print('NNmodel')
     # from command line, choose to select test mode (=True) or not
