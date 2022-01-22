@@ -1,8 +1,7 @@
 from libraries import GreedyQLearning, abstractmethod
 
-
 class Device_GreedyQLearning(GreedyQLearning):
-
+    
     def __init__(self, device):
         super().__init__()
         self.device = device
@@ -18,7 +17,7 @@ class Device_GreedyQLearning(GreedyQLearning):
     @abstractmethod
     def observe_reward_value(self, state_key, action_key):
         raise NotImplementedError("This method must be implemented.")
-
+    
     @abstractmethod
     def update_state(self, state_key, action_key):
         raise NotImplementedError("This method must be implemented.")
@@ -48,8 +47,7 @@ class Device_GreedyQLearning(GreedyQLearning):
         '''
         if self.q_df is not None and self.q_df.shape[0]:
             # min-max normalization
-            self.q_df.q_value = (self.q_df.q_value - self.q_df.q_value.min()) / (
-                    self.q_df.q_value.max() - self.q_df.q_value.min())
+            self.q_df.q_value = (self.q_df.q_value - self.q_df.q_value.min()) / (self.q_df.q_value.max() - self.q_df.q_value.min())
         return
 
     def normalize_r_value(self):

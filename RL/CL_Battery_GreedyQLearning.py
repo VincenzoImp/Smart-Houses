@@ -1,7 +1,6 @@
 from CL_GreedyQLearning import CL_GeedyQLearning
 from libraries import random
 
-
 class CL_Battery_GeedyQLearning(CL_GeedyQLearning):
 
     def __init__(self, device):
@@ -11,39 +10,29 @@ class CL_Battery_GeedyQLearning(CL_GeedyQLearning):
 
     def extract_possible_actions(self, state_key, state_of_charge):
         min_action, max_action = self.device.get_min_max_index_action(state_of_charge)
-        return [action_key for action_key in range(min_action, max_action + 1)]
+        return [action_key for action_key in range(min_action, max_action+1)]
 
     def observe_reward_value(self, state_key, action_key):
         kwh = self.device.action_list[action_key]
-        if kwh == 0 and self.tmp_state_of_charge + self.device.action_list[
-            action_key + 1] > self.device.max_capacity:  # niente index out of range per costruzione
-            kwh = min(self.device.max_energy_demand,
-                      self.device.max_capacity - self.tmp_state_of_charge)  # a causa di un'assenza di totale liberta' di range, quando la action genera E == 0 allora "rabbocco" E al current_max_energy_demand
-        local_max_energy_demand = min(self.device.max_energy_demand,
-                                      self.device.max_capacity - self.tmp_state_of_charge)
-        value = (1 - self.device.simulation.home.p) * self.device.simulation.array_price[
-            state_key[0] - 1] * kwh + self.device.simulation.home.p * (
-                        self.device.beta * ((kwh - local_max_energy_demand) ** 2))
+        if kwh == 0 and self.tmp_state_of_charge + self.device.action_list[action_key + 1] > self.device.max_capacity:  # niente index out of range per costruzione
+            kwh = min(self.device.max_energy_demand, self.device.max_capacity - self.tmp_state_of_charge)  # a causa di un'assenza di totale liberta' di range, quando la action genera E == 0 allora "rabbocco" E al current_max_energy_demand
+        local_max_energy_demand = min(self.device.max_energy_demand, self.device.max_capacity - self.tmp_state_of_charge)
+        value = (1 - self.device.simulation.home.p) * self.device.simulation.array_price[state_key[0]-1] * kwh + self.device.simulation.home.p * (self.device.beta * ((kwh - local_max_energy_demand) ** 2))
         if value == 0:
             return 1
         return 1 / value
-
+    
     def update_state(self, state_key, action_key):
         kwh = self.device.action_list[action_key]
-        if kwh == 0 and self.tmp_state_of_charge + self.device.action_list[
-            action_key + 1] > self.device.max_capacity:  # niente index out of range per costruzione
-            kwh = min(self.device.max_energy_demand,
-                      self.device.max_capacity - self.tmp_state_of_charge)  # a causa di un'assenza di totale liberta' di range, quando la action genera E == 0 allora "rabbocco" E al current_max_energy_demand
-        return (state_key[0] + 1,
-                self.device.discretize_state_of_charge(self.tmp_state_of_charge + kwh)), self.tmp_state_of_charge + kwh
+        if kwh == 0 and self.tmp_state_of_charge + self.device.action_list[action_key + 1] > self.device.max_capacity:  # niente index out of range per costruzione
+            kwh = min(self.device.max_energy_demand, self.device.max_capacity - self.tmp_state_of_charge)  # a causa di un'assenza di totale liberta' di range, quando la action genera E == 0 allora "rabbocco" E al current_max_energy_demand
+        return (state_key[0]+1, self.device.discretize_state_of_charge(self.tmp_state_of_charge + kwh)), self.tmp_state_of_charge + kwh
 
     def check_the_end_flag(self, state_key):
         return self.tmp_state_of_charge == self.device.max_capacity
 
     def visualize_learning_result(self, state_key):
-        next_action_list = self.extract_possible_actions(
-            (1, self.device.discretize_state_of_charge(self.device.current_state_of_charge)),
-            self.device.current_state_of_charge)
+        next_action_list = self.extract_possible_actions((1, self.device.discretize_state_of_charge(self.device.current_state_of_charge)), self.device.current_state_of_charge)
         if self.q_df is not None:
             next_action_q_df = self.q_df[self.q_df.state_key == state_key]
             next_action_q_df = next_action_q_df[next_action_q_df.action_key.isin(next_action_list)]
@@ -60,7 +49,7 @@ class CL_Battery_GeedyQLearning(CL_GeedyQLearning):
             return random.choice(next_action_list)
 
     def convergence(self, old_model):
-        # TO DO
+        #TO DO
         return
 
     def learn(self, state_key, limit):
@@ -72,7 +61,7 @@ class CL_Battery_GeedyQLearning(CL_GeedyQLearning):
             limit:          The maximum number of iterative updates based on value iteration algorithms.
         '''
         self.tmp_state_of_charge = self.device.current_state_of_charge
-
+        
         self.t = 1
         while self.t <= limit:
             next_action_list = self.extract_possible_actions(state_key, self.tmp_state_of_charge)
@@ -105,8 +94,8 @@ class CL_Battery_GeedyQLearning(CL_GeedyQLearning):
                 self.tmp_state_of_charge = next_tmp_state_of_charge
 
             # Normalize.
-            self.normalize_q_value()
-            # self.normalize_r_value()
+            #self.normalize_q_value()
+            #self.normalize_r_value()
 
             # Vis.
             self.visualize_learning_result(state_key)

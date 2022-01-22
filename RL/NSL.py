@@ -1,7 +1,6 @@
 from Device import Device
 from libraries import datetime
 
-
 class Non_shiftable_load(Device):
 
     def __init__(self, simulation, id, energy_demand=0, column_info=None, is_active=False):
@@ -29,7 +28,7 @@ class Non_shiftable_load(Device):
             U = (1 - self.simulation.home.p) * self.simulation.array_price[0] * E
         time = datetime.datetime.now() - time
         self.update_history(E, U, time)
-        dict_results[self.id] = {'E': E, 'U': U}
+        dict_results[self.id] = {'E':E, 'U':U}
         return
 
 

@@ -1,7 +1,8 @@
+
 class Home(object):
 
     def __init__(self, id, path_dir_home, path_energy_price, p=0.5, teta=0.1, gamma=0.95, epsilon=0.2):
-        # home datas
+        #home datas
         self.id = id
         self.path_dir_home = path_dir_home
         self.path_energy_price = path_energy_price
