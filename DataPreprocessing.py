@@ -202,13 +202,13 @@ def create_dataset(energy, nn_datas):
         writer = csv.writer(nn_datas_file)
         headers = ['timestamp']
         headers.extend(['energy_price_ahead_' + str(n) for n in range(50, 0, -1)])
-        headers.extend(['energy_price_forward_' + str(n) for n in range(1, 13)])
+        headers.extend(['energy_price_forward_' + str(n) for n in range(0, 13)])
         writer.writerow(headers)
         timestamp = []
         for index, row in islice(enumerate(reader), 1, None):
             energy_market_price.append(row[1])
             timestamp.append(row[0])
-            if index >= 62:
-                new_line = [timestamp[index - 50]]
-                new_line.extend(energy_market_price[index - 62: index])
+            if index > 62:
+                new_line = [timestamp[index - 13]]
+                new_line.extend(energy_market_price[index - 63: index])
                 writer.writerow(new_line)

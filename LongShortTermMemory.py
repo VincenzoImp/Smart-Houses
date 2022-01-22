@@ -53,25 +53,21 @@ def plot_predictions(preds, y_test, output):
 
 
 def plot_loss(history, plot_name):
-    fig, axs = plt.subplots(2, 2, figsize=(12, 12))
+    fig, axs = plt.subplots(1, 3, figsize=(15, 5))
 
     x = range(1, len(history.history['loss']) + 1)
 
-    axs[0, 0].plot(x, history.history['loss'], label='loss')
-    axs[0, 0].plot(x, history.history['val_loss'], label='val_loss')
-    axs[0, 0].set_title('Loss')
+    axs[0].plot(x, history.history['mse'], label="mse")
+    axs[0].plot(x, history.history['val_mse'], label="val_mse")
+    axs[0].set_title('Mean Squared Error')
 
-    axs[0, 1].plot(x, history.history['mse'], label="mse")
-    axs[0, 1].plot(x, history.history['val_mse'], label="val_mse")
-    axs[0, 1].set_title('Mean Squared Error')
+    axs[1].plot(x, history.history['mae'], label="mae")
+    axs[1].plot(x, history.history['val_mae'], label="val_mae")
+    axs[1].set_title('Mean Absolute Error')
 
-    axs[1, 0].plot(x, history.history['mae'], label="mae")
-    axs[1, 0].plot(x, history.history['val_mae'], label="val_mae")
-    axs[1, 0].set_title('Mean Absolute Error')
-
-    axs[1, 1].plot(x, history.history['mape'], label="mape")
-    axs[1, 1].plot(x, history.history['val_mape'], label='val_mape')
-    axs[1, 1].set_title('Mean Absolute Percentage Error')
+    axs[2].plot(x, history.history['mape'], label="mape")
+    axs[2].plot(x, history.history['val_mape'], label='val_mape')
+    axs[2].set_title('Mean Absolute Percentage Error')
 
     for ax in axs.flat:
         ax.set(xlabel='Epochs', ylabel='Loss')
@@ -82,7 +78,7 @@ def plot_loss(history, plot_name):
     # for ax in axs.flat:
     #     ax.label_outer()
 
-    fig.savefig("datas/plot/" + plot_name, dpi=1200)
+    fig.savefig("datas/plot/" + plot_name, dpi=1200, bbox_inches='tight')
     fig.clf()
 
 
@@ -152,7 +148,9 @@ def run_hypermodel(output_hypermodel_csv, scaler, x_test, x_train, y_test, y_tra
             "reals12"
         ])
         for index in range(preds_normal.shape[0]):
-            row = np.concatenate([x_test[index, 0], preds_normal[index, :], y_test_normal[index, :]])
+            timestamp = pd.Timestamp(x_test[index, 0][0]) - pd.Timedelta('1 hours')
+            row = [str(timestamp)]
+            row = np.concatenate([row, preds_normal[index, :], y_test_normal[index, :]])
             row = map(str, row)
             csv.writer(file_obj).writerow(row)
 
@@ -222,7 +220,9 @@ def run_base_model(output_baseline_csv, scaler, x_test, x_train, y_test, y_train
             "reals12"
         ])
         for index in range(preds_normal.shape[0]):
-            row = np.concatenate([x_test[index, 0], preds_normal[index, :], y_test_normal[index, :]])
+            timestamp = pd.Timestamp(x_test[index, 0][0]) - pd.Timedelta('1 hours')
+            row = [str(timestamp)]
+            row = np.concatenate([row, preds_normal[index, :], y_test_normal[index, :]])
             row = map(str, row)
             csv.writer(file_obj).writerow(row)
 
