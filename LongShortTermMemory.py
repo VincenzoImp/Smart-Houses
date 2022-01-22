@@ -148,7 +148,8 @@ def run_hypermodel(output_hypermodel_csv, scaler, x_test, x_train, y_test, y_tra
             "reals12"
         ])
         for index in range(preds_normal.shape[0]):
-            row = np.concatenate([x_test[index, 0][0], preds_normal[index, :], y_test_normal[index, :]])
+            row = [x_test[index, 0][0]]
+            row = np.concatenate([row, preds_normal[index, :], y_test_normal[index, :]])
             row = map(str, row)
             csv.writer(file_obj).writerow(row)
 
@@ -218,7 +219,8 @@ def run_base_model(output_baseline_csv, scaler, x_test, x_train, y_test, y_train
             "reals12"
         ])
         for index in range(preds_normal.shape[0]):
-            row = np.concatenate([x_test[index, 0][0], preds_normal[index, :], y_test_normal[index, :]])
+            row = [x_test[index, 0][0]]
+            row = np.concatenate([row, preds_normal[index, :], y_test_normal[index, :]])
             row = map(str, row)
             csv.writer(file_obj).writerow(row)
 
