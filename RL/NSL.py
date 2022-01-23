@@ -3,8 +3,8 @@ from libraries import datetime
 
 class Non_shiftable_load(Device):
 
-    def __init__(self, simulation, id, energy_demand=0, column_info=None, is_active=False):
-        super().__init__(simulation, id, column_info, is_active)
+    def __init__(self, simulation, id, energy_demand=0, column_info=None, plots_directory="", is_active=False):
+        super().__init__(simulation, id, column_info, plots_directory, is_active)
         self.energy_demand = energy_demand
         return
 

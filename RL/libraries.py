@@ -9,4 +9,5 @@ import random
 import copy
 import multiprocessing
 from abc import ABCMeta, abstractmethod
+import matplotlib.pyplot as plt
 from pyqlearning.qlearning.greedy_q_learning import GreedyQLearning

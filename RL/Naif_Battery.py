@@ -3,8 +3,8 @@ from libraries import csv, pd, os, datetime
 
 class Naif_Battery(Device):
 
-    def __init__(self, simulation, id, max_capacity, current_state_of_charge, deficit=0, energy_demand=0, column_info=None, is_active=False):  # Tini, Tw, Tend devono rispettare i vincoli descritti nell'articolo e dovrebbero matchare con is_active
-        super().__init__(simulation, id, column_info, is_active)
+    def __init__(self, simulation, id, max_capacity, current_state_of_charge, deficit=0, energy_demand=0, column_info=None, plots_directory="", is_active=False):  # Tini, Tw, Tend devono rispettare i vincoli descritti nell'articolo e dovrebbero matchare con is_active
+        super().__init__(simulation, id, column_info, plots_directory, is_active)
         self.max_capacity = max_capacity
         self.current_state_of_charge = current_state_of_charge
         self.deficit = deficit

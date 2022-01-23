@@ -105,4 +105,5 @@ class CL_Battery_GeedyQLearning(CL_GeedyQLearning):
 
             # Epsode.
             self.t += 1
+        
         return
