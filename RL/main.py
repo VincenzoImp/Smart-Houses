@@ -9,7 +9,7 @@ def main(houses_to_simulate, houses_folder, path_energy_price, path_results):
         id = "home_{}".format(id)
         path_dir_home = os.path.join(houses_folder, id)
         home = Home(id, path_dir_home, path_energy_price, p=0.3)
-        simulation = Simulation(home, path_results, loops=10)
+        simulation = Simulation(home, path_results, loops=10000)
         process = multiprocessing.Process(target=simulation.run)
         process_list.append(process)
     for process in process_list:
