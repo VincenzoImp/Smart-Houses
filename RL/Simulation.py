@@ -55,7 +55,12 @@ class Simulation(object):
             U = 0.0
             try:
                 self.timestamp = self.house_profile_DF.at[self.count_row, "timestamp"]
-                self.array_price = self.energy_price_DF.iloc[self.count_row, 1:13].to_list()
+                self.array_price = [self.house_profile_DF.at[self.count_row, "energy_market_price"]] + self.energy_price_DF.iloc[self.count_row, 1:13].to_list()
+                """
+                self.array_price = []
+                for i in range(self.count_row, self.count_row+12):
+                    self.array_price.append(self.house_profile_DF.at[i, "energy_market_price"])
+                """
             except KeyError:
                 break
             dict_results = multiprocessing.Manager().dict()
@@ -76,10 +81,28 @@ class Simulation(object):
             with open(main_filename, "a") as file_object:
                 csv.writer(file_object).writerow([self.timestamp, E, U, time])
             self.count_row += 1
-        info_filename = os.path.join(self.directory, "info.csv")
+        info_filename = os.path.join(self.directory, "home_info.csv")
         with open(info_filename, "w") as file_object:
             csv.writer(file_object).writerow(["p", "theta", "gamma", "epsilon", "loops"])
             csv.writer(file_object).writerow([self.home.p, self.home.teta, self.home.gamma, self.home.epsilon, self.loops])
+        info_filename = os.path.join(self.directory, "device_info.csv")
+        with open(info_filename, "w") as file_object:
+            csv.writer(file_object).writerow(["device_id", "state_number", "action_number", "beta", "max_capacity", "min_energy_demand", "max_energy_demand", "deficit", "energy_demand"])
+            print_list = []
+            for device in self.device_list:
+                if type(device) == Non_shiftable_load:
+                    print_list.append([device.id, "-", "-", "-", "-", "-", "-", "-", device.energy_demand])
+                if type(device) == NSL_Battery:
+                    print_list.append([device.id, "-", "-", "-", device.max_capacity, "-", "-", "-", device.energy_demand])
+                if type(device) == Naif_Battery:
+                    print_list.append([device.id, "-", "-", "-", device.max_capacity, "-", "-", device.deficit, device.energy_demand])
+                if type(device) == Controlable_load:
+                    print_list.append([device.id, device.state_number, device.action_number, device.beta, "-", device.min_energy_demand, device.max_energy_demand, "-", "-"])
+                if type(device) == CL_Battery:
+                    print_list.append([device.id, device.state_number, device.action_number, device.beta, device.max_capacity, device.min_energy_demand, device.max_energy_demand, "-", "-"])
+            print_list = sorted(print_list, key=lambda x: x[0])
+            for to_print in print_list:
+                csv.writer(file_object).writerow(to_print)
         return
 
     def evaluate(self):

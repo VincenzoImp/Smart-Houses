@@ -4,8 +4,8 @@ from Device import Device
 
 class Controlable_load(Device):
 
-    def __init__(self, simulation, id, beta, min_energy_demand, max_energy_demand, state_number, action_number, column_info=None, is_active=False):  # si assume che action_number >=2
-        super().__init__(simulation, id, column_info, is_active)
+    def __init__(self, simulation, id, beta, min_energy_demand, max_energy_demand, state_number, action_number, column_info=None, plots_directory="", is_active=False):  # si assume che action_number >=2
+        super().__init__(simulation, id, column_info, plots_directory, is_active)
         self.beta = beta
         self.min_energy_demand = min_energy_demand  # si assuma sia diverso da max_energy_demand
         self.max_energy_demand = max_energy_demand  # si assuma sia diverso da min_energy_demand

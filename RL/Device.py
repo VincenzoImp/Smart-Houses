@@ -2,10 +2,11 @@ from libraries import os, csv, ABCMeta, abstractmethod
 
 class Device(metaclass=ABCMeta):
 
-    def __init__(self, simulation, id, column_info=None, is_active=False):
+    def __init__(self, simulation, id, column_info=None, plots_directory="", is_active=False):
         self.simulation = simulation
         self.id = id
         self.column_info = column_info
+        self.plots_directory = plots_directory
         self.is_active = is_active
         self.filename = os.path.join(self.simulation.directory, str(self.id) + ".csv")
         self.initialize_file()
