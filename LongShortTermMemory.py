@@ -40,13 +40,12 @@ def hypermodel_builder(hp):
 
 def plot_predictions(preds, y_test, output):
     fig, ax = plt.subplots()
-    ax.plot(y_test[0::2, 0], preds[0::2, 0], 'r.', alpha=0.5, label="hour + 1")
-    ax.plot(y_test[0::2, 5], preds[0::2, 5], 'b.', alpha=0.5, label="hour + 6")
-    ax.plot(y_test[0::2, 11], preds[0::2, 11], 'g.', alpha=0.5, label="hour + 12")
+    ax.plot(y_test[0::2, 0], preds[0::2, 0], 'r.', alpha=0.5, label="predicted hour + 1")
+    ax.plot(y_test[0::2, 5], preds[0::2, 5], 'b.', alpha=0.5, label="predicted hour + 6")
+    ax.plot(y_test[0::2, 11], preds[0::2, 11], 'g.', alpha=0.5, label="predicted hour + 12")
     ax.plot(np.linspace(y_test.min(), y_test.max()), np.linspace(y_test.min(), y_test.max()),
-            linestyle="dashed")
-    ax.set_ylabel("predicted")
-    ax.set_xlabel("real")
+            linestyle="dashed", label="real")
+
     ax.legend()
     fig.savefig("datas/plot/" + output, dpi=1200)
     fig.clf()

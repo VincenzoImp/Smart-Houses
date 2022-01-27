@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn.impute import KNNImputer
-# preprocess dataset removing nan values
 from sklearn.preprocessing import MinMaxScaler
 
 
