@@ -1,5 +1,5 @@
 from CL_GreedyQLearning import CL_GeedyQLearning
-from libraries import random
+from libraries import random, math
 
 class CL_Battery_GeedyQLearning(CL_GeedyQLearning):
 
@@ -17,10 +17,16 @@ class CL_Battery_GeedyQLearning(CL_GeedyQLearning):
         if kwh == 0 and self.tmp_state_of_charge + self.device.action_list[action_key + 1] > self.device.max_capacity:  # niente index out of range per costruzione
             kwh = min(self.device.max_energy_demand, self.device.max_capacity - self.tmp_state_of_charge)  # a causa di un'assenza di totale liberta' di range, quando la action genera E == 0 allora "rabbocco" E al current_max_energy_demand
         local_max_energy_demand = min(self.device.max_energy_demand, self.device.max_capacity - self.tmp_state_of_charge)
-        value = (1 - self.device.simulation.home.p) * self.device.simulation.array_price[state_key[0]-1] * kwh + self.device.simulation.home.p * (self.device.beta * ((kwh - local_max_energy_demand) ** 2))
-        if value == 0:
-            return 1
-        return 1 / value
+        P = self.device.simulation.array_price[state_key[0]-1]
+        rho = self.device.simulation.home.p
+        beta = self.device.beta
+        m = local_max_energy_demand
+        x = kwh
+        y = (1-rho)*P*x+rho*(beta*(x-m)**2)
+        d = (1-rho)*P*m+rho*(beta*(self.device.min_energy_demand-m)**2)
+        value = 0 if d == 0 else y/d
+        reward = 1-value
+        return reward
     
     def update_state(self, state_key, action_key):
         kwh = self.device.action_list[action_key]

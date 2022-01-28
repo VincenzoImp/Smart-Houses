@@ -1,6 +1,6 @@
 from CL import Controlable_load
 from CL_Battery_GreedyQLearning import CL_Battery_GeedyQLearning
-from libraries import csv, datetime, os, copy, plt, os, pd
+from libraries import csv, datetime, os, copy, plt, os, pd, math
 
 
 class CL_Battery(Controlable_load):
@@ -9,7 +9,7 @@ class CL_Battery(Controlable_load):
         super().__init__(simulation, id, beta, min_energy_demand, max_energy_demand, state_number, action_number, column_info, plots_directory, is_active)
         self.max_capacity = max_capacity
         self.current_state_of_charge = current_state_of_charge
-        self.LIMIT = 7
+        self.LIMIT = 24
         return
 
     def initialize_file(self):
@@ -46,7 +46,6 @@ class CL_Battery(Controlable_load):
         if self.is_active:  # caso in cui posso stare nelle righe diverse da -1
             if self.plots_directory != "":
                 q_list = []
-                a_list = []
             if self.current_state_of_charge + self.action_list[self.action_list.index(0) + 1] > self.max_capacity:
                 action = self.action_list.index(0)
             else:
@@ -61,12 +60,10 @@ class CL_Battery(Controlable_load):
 
                     if self.plots_directory != "":
                         next_action_list = CL_Battery_model.extract_possible_actions(state_key, self.current_state_of_charge)
-                        action = CL_Battery_model.predict_next_action(state_key, next_action_list)
+                        action_key = CL_Battery_model.predict_next_action(state_key, next_action_list)
                         q_df = CL_Battery_model.get_q_df()
                         q_df = q_df[q_df.state_key == state_key]
-                        q_list.append(q_df[q_df.action_key == action]["q_value"].values[0])   
-                        a_list.append(self.action_list[action])                 
-
+                        q_list.append(q_df[q_df.action_key == action_key]["q_value"].values[0])   
                     i += 1
                     if self.simulation == None and CL_Battery_model.convergence(old_CL_Battery_model):
                         break
@@ -76,23 +73,11 @@ class CL_Battery(Controlable_load):
 
             if self.plots_directory != "":
                 x_list = list(range(len(q_list)))
-                fig, axs = plt.subplots(2)
-                fig.suptitle(self.id + "." + self.simulation.timestamp.replace(":", "_"))
-                axs[0].plot(x_list, q_list)
-                axs[1].plot(x_list, a_list, 'tab:orange')
-                axs[0].set(xlabel='epochs', ylabel='max q_value')
-                axs[1].set(xlabel='epochs', ylabel='max action')
-                for ax in fig.get_axes():
-                    ax.label_outer()
-                fig.savefig(os.path.join(self.plots_directory, self.id + "." + self.simulation.timestamp.replace(":", "_") +".png"))
-                
-                
-                """
                 plt.plot(x_list, q_list)
-                plt.savefig(os.path.join(self.plots_directory, self.id + ".max_q." + self.simulation.timestamp.replace(":", "_") +".png"))
-                plt.plot(x_list, a_list)
-                plt.savefig(os.path.join(self.plots_directory, self.id + ".max_a." + self.simulation.timestamp.replace(":", "_") +".png"))
-                """
+                plt.suptitle(self.id + "." + self.simulation.timestamp.replace(":", "_"))
+                plt.xlabel('epochs')
+                plt.ylabel('q_value')
+                plt.savefig(os.path.join(self.plots_directory, self.id + "." + self.simulation.timestamp.replace(":", "_") +".png"))
 
             kwh = self.action_list[action]
             local_max_energy_demand = min(self.max_energy_demand, self.max_capacity - self.current_state_of_charge)
