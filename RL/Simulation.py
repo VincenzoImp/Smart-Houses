@@ -1,5 +1,7 @@
 from NSL import *
 from NSL_Battery import *
+from SL import *
+from SL_Battery import *
 from CL import *
 from CL_Battery import *
 from DP_Battery import *
@@ -27,6 +29,8 @@ class Simulation(object):
     def insert_devices(self):
         #insert_NSL(self)
         insert_NSL_Battery(self)
+        #insert_SL(self)
+        #insert_SL_Battery(self)
         #insert_CL(self)
         insert_CL_Battery(self)
         #insert_DP_Battery(self)

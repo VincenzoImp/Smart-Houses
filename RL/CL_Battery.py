@@ -51,8 +51,8 @@ class CL_Battery(Controlable_load):
             else:
 
                 CL_Battery_model = CL_Battery_GeedyQLearning(self)
-                while (self.simulation != None and i <= self.simulation.loops) or self.simulation == None:
-                    if self.simulation == None:
+                while (self.simulation.loops != None and i <= self.simulation.loops) or self.simulation == None:
+                    if self.simulation.loops == None:
                         old_CL_Battery_model = copy(CL_Battery_model)
                     state_key = (1, self.discretize_state_of_charge(self.current_state_of_charge))
                     limit = min(self.LIMIT, len(self.simulation.array_price))
