@@ -1,0 +1,7 @@
+device_id,state_number,action_number,beta,max_capacity,min_energy_demand,max_energy_demand,deficit,energy_demand
+NSL_Battery.0,-,-,-,16.0,-,-,-,3.6
+Naif_Battery.0,-,-,-,16.0,-,-,0.0,3.6
+Naif_Battery.1,-,-,-,16.0,-,-,0.25,3.6
+Naif_Battery.2,-,-,-,16.0,-,-,0.5,3.6
+Naif_Battery.3,-,-,-,16.0,-,-,1.0,3.6
+Naif_Battery.4,-,-,-,16.0,-,-,2.0,3.6
