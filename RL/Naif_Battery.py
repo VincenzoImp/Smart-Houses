@@ -1,9 +1,12 @@
 from Device import Device
 from libraries import csv, pd, os, datetime
 
+
 class Naif_Battery(Device):
 
-    def __init__(self, simulation, id, max_capacity, current_state_of_charge, deficit=0, energy_demand=0, column_info=None, plots_directory="", is_active=False):  # Tini, Tw, Tend devono rispettare i vincoli descritti nell'articolo e dovrebbero matchare con is_active
+    def __init__(self, simulation, id, max_capacity, current_state_of_charge, deficit=0, energy_demand=0,
+                 column_info=None, plots_directory="",
+                 is_active=False):  # Tini, Tw, Tend devono rispettare i vincoli descritti nell'articolo e dovrebbero matchare con is_active
         super().__init__(simulation, id, column_info, plots_directory, is_active)
         self.max_capacity = max_capacity
         self.current_state_of_charge = current_state_of_charge
@@ -20,7 +23,8 @@ class Naif_Battery(Device):
     def update_history(self, E, U, time):
         with open(self.filename, "a") as file_object:
             if self.is_active:
-                csv.writer(file_object).writerow([self.simulation.timestamp, "on", E, U, time, self.current_state_of_charge])
+                csv.writer(file_object).writerow(
+                    [self.simulation.timestamp, "on", E, U, time, self.current_state_of_charge])
             else:
                 csv.writer(file_object).writerow([self.simulation.timestamp, "off", 0, 0, 0, -1])
         return
@@ -46,7 +50,8 @@ class Naif_Battery(Device):
         if self.is_active:
             current_kwh = 0.0
             state_of_charge = min(self.max_capacity, self.current_state_of_charge + self.deficit)
-            d = {(self.simulation.array_price[index], index): 0.0 for index in range(min(self.hours_available, len(self.simulation.array_price)))}
+            d = {(self.simulation.array_price[index], index): 0.0 for index in
+                 range(min(self.hours_available, len(self.simulation.array_price)))}
             for k in sorted(list(d.keys())):
                 kwh = min(self.energy_demand, self.max_capacity - state_of_charge)
                 d[k] = kwh
@@ -59,7 +64,7 @@ class Naif_Battery(Device):
             self.hours_available -= 1
         time = datetime.datetime.now() - time
         self.update_history(E, U, time)
-        dict_results[self.id] = {'E':E, 'U':U, 'SOC':self.current_state_of_charge}
+        dict_results[self.id] = {'E': E, 'U': U, 'SOC': self.current_state_of_charge}
         return
 
 
@@ -74,7 +79,8 @@ def insert_Naif_Battery(simulation):
         energy_demand = float(row["charge_speed_kw"])
         deficit = float(row["deficit"])
         max_capacity = float(row["battery_capacity_kwh"])
-        new_battery = Naif_Battery(simulation, "Naif_Battery." + str(row_index), max_capacity, 0, deficit, energy_demand, ("PEV_input_state_of_charge", "PEV_hours_of_charge"))
+        new_battery = Naif_Battery(simulation, "Naif_Battery." + str(row_index), max_capacity, 0, deficit,
+                                   energy_demand, ("PEV_input_state_of_charge", "PEV_hours_of_charge"))
         simulation.device_list.add(new_battery)
         row_index += 1
     return

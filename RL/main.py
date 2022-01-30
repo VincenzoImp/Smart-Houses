@@ -20,7 +20,6 @@ def main(houses_to_simulate, houses_folder, path_energy_price, path_results):
 
 
 if __name__ == "__main__":
-
     houses_to_simulate = {69}
     houses_folder = './../datas/muratori_5'
     path_energy_price = './../datas/NN_hypermodel_results.csv'

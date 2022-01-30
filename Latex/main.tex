@@ -7,7 +7,7 @@
 \usepackage{amsfonts}
 \usepackage{float}
 \usepackage[hidelinks]{hyperref}
-\usepackage[backend=bibtex]{biblatex}
+\usepackage[backend=bibtex, sorting=none]{biblatex}
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{svg}
@@ -26,22 +26,6 @@
 
 \addbibresource{bibliography.bib}
 \nocite{*}
-
-\lstset{ % General setup for the package
-    language=Python,
-    basicstyle=\small\sffamily,
-    numbers=left,
-    numberstyle=\tiny,
-    frame=tb,
-    tabsize=4,
-    columns=fixed,
-    showstringspaces=false,
-    showtabs=false,
-    breaklines,
-    keepspaces,
-    commentstyle=\color{red},
-    keywordstyle=\color{blue}
-}
 
 \begin{document}
 
@@ -104,6 +88,5 @@ imperati.1834930@studenti.uniroma1.it
 
 
 \newpage
-\printbibliography
-
+\printbibliography[heading=bibintoc]
 \end{document}

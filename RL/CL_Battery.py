@@ -1,12 +1,14 @@
 from CL import Controlable_load
 from CL_Battery_GreedyQLearning import CL_Battery_GeedyQLearning
-from libraries import csv, datetime, os, copy, plt, os, pd, math
+from libraries import csv, datetime, copy, plt, os, pd
 
 
 class CL_Battery(Controlable_load):
 
-    def __init__(self, simulation, id, beta, min_energy_demand, max_energy_demand, state_number, action_number, max_capacity, current_state_of_charge=0, column_info=None, plots_directory="", is_active=False):
-        super().__init__(simulation, id, beta, min_energy_demand, max_energy_demand, state_number, action_number, column_info, plots_directory, is_active)
+    def __init__(self, simulation, id, beta, min_energy_demand, max_energy_demand, state_number, action_number,
+                 max_capacity, current_state_of_charge=0, column_info=None, plots_directory="", is_active=False):
+        super().__init__(simulation, id, beta, min_energy_demand, max_energy_demand, state_number, action_number,
+                         column_info, plots_directory, is_active)
         self.max_capacity = max_capacity
         self.current_state_of_charge = current_state_of_charge
         self.LIMIT = 24
@@ -20,14 +22,16 @@ class CL_Battery(Controlable_load):
     def update_history(self, E, U, time):
         with open(self.filename, "a") as file_object:
             if self.is_active:
-                csv.writer(file_object).writerow([self.simulation.timestamp, "on", E, U, time, self.current_state_of_charge])
+                csv.writer(file_object).writerow(
+                    [self.simulation.timestamp, "on", E, U, time, self.current_state_of_charge])
             else:
                 csv.writer(file_object).writerow([self.simulation.timestamp, "off", 0, 0, 0, -1])
         return
 
     def update_data(self):
         if self.column_info != None:
-            new_current_state_of_charge = self.simulation.house_profile_DF.at[self.simulation.count_row, self.column_info]
+            new_current_state_of_charge = self.simulation.house_profile_DF.at[
+                self.simulation.count_row, self.column_info]
             if new_current_state_of_charge == -1:
                 self.is_active = False
                 self.current_state_of_charge = -1
@@ -37,7 +41,7 @@ class CL_Battery(Controlable_load):
                 self.is_active = True
                 self.current_state_of_charge = new_current_state_of_charge
         return
-        
+
     def function(self, dict_results):
         time = datetime.datetime.now()
         E = 0.0
@@ -59,11 +63,12 @@ class CL_Battery(Controlable_load):
                     CL_Battery_model.learn(state_key, limit)
 
                     if self.plots_directory != "":
-                        next_action_list = CL_Battery_model.extract_possible_actions(state_key, self.current_state_of_charge)
+                        next_action_list = CL_Battery_model.extract_possible_actions(state_key,
+                                                                                     self.current_state_of_charge)
                         action_key = CL_Battery_model.predict_next_action(state_key, next_action_list)
                         q_df = CL_Battery_model.get_q_df()
                         q_df = q_df[q_df.state_key == state_key]
-                        q_list.append(q_df[q_df.action_key == action_key]["q_value"].values[0])   
+                        q_list.append(q_df[q_df.action_key == action_key]["q_value"].values[0])
                     i += 1
                     if self.simulation == None and CL_Battery_model.convergence(old_CL_Battery_model):
                         break
@@ -77,18 +82,22 @@ class CL_Battery(Controlable_load):
                 plt.suptitle(self.id + "." + self.simulation.timestamp.replace(":", "_"))
                 plt.xlabel('epochs')
                 plt.ylabel('q_value')
-                plt.savefig(os.path.join(self.plots_directory, self.id + "." + self.simulation.timestamp.replace(":", "_") +".png"))
+                plt.savefig(os.path.join(self.plots_directory,
+                                         self.id + "." + self.simulation.timestamp.replace(":", "_") + ".png"))
 
             kwh = self.action_list[action]
             local_max_energy_demand = min(self.max_energy_demand, self.max_capacity - self.current_state_of_charge)
-            if kwh == 0 and self.current_state_of_charge + self.action_list[action + 1] > self.max_capacity:  # niente index out of range per costruzione
-                kwh = min(self.max_energy_demand, self.max_capacity - self.current_state_of_charge)  # a causa di un'assenza di totale liberta' di range, quando la action genera E == 0 allora "rabbocco" E al current_max_energy_demand
+            if kwh == 0 and self.current_state_of_charge + self.action_list[
+                action + 1] > self.max_capacity:  # niente index out of range per costruzione
+                kwh = min(self.max_energy_demand,
+                          self.max_capacity - self.current_state_of_charge)  # a causa di un'assenza di totale liberta' di range, quando la action genera E == 0 allora "rabbocco" E al current_max_energy_demand
             self.current_state_of_charge += kwh
             E = kwh
-            U = (1 - self.simulation.home.p) * self.simulation.array_price[0] * E + self.simulation.home.p * (self.beta * ((E - local_max_energy_demand) ** 2))
+            U = (1 - self.simulation.home.p) * self.simulation.array_price[0] * E + self.simulation.home.p * (
+                    self.beta * ((E - local_max_energy_demand) ** 2))
         time = datetime.datetime.now() - time
         self.update_history(E, U, time)
-        dict_results[self.id] = {'E':E, 'U':U, 'SOC':self.current_state_of_charge}
+        dict_results[self.id] = {'E': E, 'U': U, 'SOC': self.current_state_of_charge}
         return
 
     def discretize_state_of_charge(self, state_of_charge):
@@ -138,7 +147,8 @@ def insert_CL_Battery(simulation):
         beta = float(row["beta"])
         max_capacity = float(row["battery_capacity_kwh"])
         new_battery = CL_Battery(simulation, device_id, beta, min_energy_demand, max_energy_demand,
-                                 state_number, action_number, max_capacity, 0, "PEV_input_state_of_charge", plots_directory)
+                                 state_number, action_number, max_capacity, 0, "PEV_input_state_of_charge",
+                                 plots_directory)
         simulation.device_list.add(new_battery)
         row_index += 1
     return

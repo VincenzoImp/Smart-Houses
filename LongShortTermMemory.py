@@ -95,7 +95,7 @@ def run_hypermodel(output_hypermodel_csv, scaler, x_test, x_train, y_test, y_tra
     # Callback to stop the training when validation loss increases
     callback = EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True)
 
-    # Perform hypertuning
+    # Perform hypertuning - only if the 'output' directory is not found
     tuner.search(x_train[:, 1:].astype('float64'), y_train, validation_split=0.2, callbacks=[callback])
 
     print("Best Hyperparameters:")

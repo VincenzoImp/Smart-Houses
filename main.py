@@ -27,7 +27,7 @@ if __name__ == '__main__':
     create_dataset(energy_price_file, NN_datas_file)
 
     print('NNmodel')
-    # from command line, choose to select test mode (=True) or not
+    # from command line, choose to select test mode (=True) or not - Test mode is faster because takes only 30% of the dataset
     if len(sys.argv) < 2:
         LongShortTermMemory(NN_datas_file, NN_baseline_result_file, NN_hypermodel_result_file)
     else:
