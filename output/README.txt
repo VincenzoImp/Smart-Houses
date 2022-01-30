@@ -1,0 +1,1 @@
+In here, there are supposed to be all the trials for the hyper parameter tuning. Unfortunately, since they take a lot of space, we decided to submit the project without them. This means that the first part can't be executed since valuable informations here are missing.
