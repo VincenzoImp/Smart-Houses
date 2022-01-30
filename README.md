@@ -9,3 +9,5 @@
   reinforcement learning, you must choose a list of houses that you want simulate from *muratori_5* directory. for each
   house chosen you must insert in the corresponding house folder the files of devices that you want insert in simulation
   of the corresponding house.
+
+### Link to the GitHub repository: [Machine Learning Project](https://github.com/deborahdore/Machine-Learning-Project)
