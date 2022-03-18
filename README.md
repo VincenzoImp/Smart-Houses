@@ -1,4 +1,4 @@
-# Machine-Learning-Project
+# Smart Houses
 
 #### This repository was created by Deborah Dore and Vincenzo Imperati.
 
@@ -10,4 +10,4 @@
   house chosen you must insert in the corresponding house folder the files of devices that you want insert in simulation
   of the corresponding house.
 
-### Link to the GitHub repository: [Machine Learning Project](https://github.com/deborahdore/Machine-Learning-Project)
+### Link to the GitHub repository: [Project](https://github.com/deborahdore/Machine-Learning-Project)
