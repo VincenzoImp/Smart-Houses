@@ -1,7 +1,7 @@
 # Smart Houses
 
 #### This repository was created by Deborah Dore and Vincenzo Imperati.
-### [Here](Smart Houses.pdf) you can find the description of the project and its final purpose.
+- [Here](Smart Houses.pdf) you can find the description of the project and its final purpose.
 
 
 - The main file used to start the fist phase of the project is [this](main.py): you can start the file in *test mode* by
