@@ -1,6 +1,6 @@
 # Machine-Learning-Project
 
-#### Repository for the Machine Learning project 21-22 - This repository was created by Deborah Dore and Vincenzo Imperati.
+#### This repository was created by Deborah Dore and Vincenzo Imperati.
 
 - The main file used to start the fist phase of the project is [this](main.py): you can start the file in *test mode* by
   adding *True* when executing the file.
